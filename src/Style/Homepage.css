@@ -1,0 +1,114 @@
+/* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body, html {
+    font-family: 'Roboto', sans-serif;
+    height: 100%;
+    background-color: #f8f9fa;
+    overflow: hidden;
+  }
+  
+  .main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  .content-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    background-color: #ffffff;
+  }
+  
+  .text-container {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+  }
+  
+  .heading {
+    font-size: 4rem;
+    color: #e91e63;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .subheading {
+    font-size: 1.8rem;
+    color: #333;
+    max-width: 600px;
+    margin-bottom: 30px;
+  }
+  
+  .get-started-button {
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.3rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .get-started-button:hover {
+    background-color: #d81b60;
+  }
+  
+  .animation-container {
+    flex: 1;
+    height: 100%;
+    background: linear-gradient(135deg, #ffafbd, #ffc3a0, #ff6b6b, #f9d423);
+    background-size: 400% 400%;
+    animation: gradient-animation 10s ease infinite;
+  }
+  
+  /* Animation for the gradient background */
+  @keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  @media (max-width: 768px) {
+    .content-container {
+      flex-direction: column;
+      justify-content: center;
+    }
+  
+    .text-container {
+      text-align: center;
+      padding: 20px;
+    }
+  
+    .heading {
+      font-size: 3rem;
+    }
+  
+    .subheading {
+      font-size: 1.5rem;
+    }
+  
+    .get-started-button {
+      font-size: 1.2rem;
+      padding: 10px 20px;
+    }
+  
+    .animation-container {
+      height: 30vh;
+      width: 100%;
+    }
+  }
+  
