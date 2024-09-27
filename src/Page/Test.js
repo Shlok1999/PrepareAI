@@ -122,6 +122,8 @@ function Test() {
   const [showResultModal, setShowResultModal] = useState(false);
   const [score, setScore] = useState(0);
   const [studentName] = useState(""); // Replace with actual student name or pass as a prop
+  const [isSubmitting, setIsSubmitting] = useState(false); // State to handle button loading
+
 
   // Timer logic
   useEffect(() => {
@@ -140,6 +142,7 @@ function Test() {
   };
 
   const submitTest = () => {
+    setIsSubmitting(true)
     let newScore = 0;
     questions.forEach((q) => {
       const userAnswer = selectedAnswers[q.id];
@@ -152,6 +155,7 @@ function Test() {
     setScore(newScore);
     setIsSubmitted(true);
     setShowResultModal(true);
+    setIsSubmitting(false)
   };
 
   const formatTime = () => {
@@ -211,17 +215,13 @@ function Test() {
 
       {!isSubmitted && (
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            submitTest();
-          }}
-          onTouchStart={(e) => {
-            e.preventDefault();
-            submitTest();
-          }}
-          className="submit-button">
-          Submit Test
-        </button>
+        onClick={submitTest}
+        onTouchStart={submitTest}
+        className="submit-button"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Loading...' : 'Submit Test'} {/* Button shows loading state */}
+      </button>
       )}
 
       {showResultModal && (
