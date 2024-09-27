@@ -168,13 +168,29 @@ function Test() {
     setShowResultModal(false);
   };
 
+  const shuffleArray = (array) => {
+    const shuffled = array.slice(); // Copy the array to avoid mutating the original
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1)); // Random index from 0 to i
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
+    }
+    return shuffled;
+  };
+
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+  useEffect(() => {
+    // Shuffle questions on component mount
+    setShuffledQuestions(shuffleArray(questions));
+  }, []);
+
   return (
     <div className="test-container">
       <h1 className="test-heading">Test Page</h1>
       <div className="student-name">Student Name: {studentName}</div>
       <div className="timer">Time Left: {formatTime()}</div>
 
-      {questions.map((q) => (
+      {shuffledQuestions.map((q) => (
         <div key={q.id} className="question-container">
           <h3>{q.question}</h3>
           <div className="options-container">
