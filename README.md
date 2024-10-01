@@ -1,7 +1,7 @@
-# StudyAI: Intelligent IIT JEE Preparation Platform
+# StudyAI: Intelligent competitive exam Preparation Platform
 
 ## Project Overview
-StudyAI is an innovative platform designed to democratize IIT JEE preparation by providing high-quality, personalized study materials and test preparation resources to all aspirants, regardless of their socioeconomic background.
+StudyAI is an innovative platform designed to democratize competitive exam preparation by providing high-quality, personalized study materials and test preparation resources to all aspirants, regardless of their socioeconomic background.
 
 ## Technologies
 
@@ -70,10 +70,10 @@ StudyAI is an innovative platform designed to democratize IIT JEE preparation by
 
 ## Project Description
 
-StudyAI aims to bridge the educational gap in IIT JEE preparation by leveraging technology to provide affordable, accessible, and high-quality study resources. The platform will use machine learning algorithms to offer personalized learning experiences, adaptive quizzing, and intelligent performance analysis.
+StudyAI aims to bridge the educational gap in competitive exam preparation by leveraging technology to provide affordable, accessible, and high-quality study resources. The platform will use machine learning algorithms to offer personalized learning experiences, adaptive quizzing, and intelligent performance analysis.
 
 Key Features:
-1. Comprehensive question bank covering all IIT JEE topics
+1. Comprehensive question bank covering all competitive exam topics
 2. AI-powered topic modeling for precise question categorization
 3. Adaptive difficulty scaling based on user performance
 4. Personalized study plans and weak area identification
@@ -83,4 +83,4 @@ Key Features:
 
 The project will be developed in phases, starting with a basic quiz functionality and gradually incorporating advanced AI features. The machine learning component will involve natural language processing for question analysis, collaborative filtering for personalized recommendations, and predictive modeling for performance forecasting.
 
-By providing these advanced features at an affordable price point, StudyAI aims to level the playing field for IIT JEE aspirants from all backgrounds, contributing to greater educational equality.
+By providing these advanced features at an affordable price point, StudyAI aims to level the playing field for competitive exam aspirants from all backgrounds, contributing to greater educational equality.
