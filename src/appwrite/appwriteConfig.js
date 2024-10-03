@@ -24,7 +24,6 @@ const addQuestionsToAppwrite = async () => {
         }
       );
     }
-    console.log('Questions successfully added to Appwrite!');
   } catch (error) {
     console.error('Error adding questions:', error);
   }

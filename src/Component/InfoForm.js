@@ -39,9 +39,6 @@ function InfoForm({ isOpen, onClose }) {
           email: formData.email,
         }
       );
-
-      console.log('Form successfully submitted', response);
-      // Redirect to the Test page after form submission
       navigate('/test');
     } catch (error) {
       console.error('Error submitting the form:', error);
