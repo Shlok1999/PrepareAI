@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { databases } from '../appwrite/appwriteConfig'; // Import configured Appwrite client
-import './InfoForm.css';
+import '../Style/InfoForm.css';
 
 function InfoForm({ isOpen, onClose }) {
   const databaseId = process.env.REACT_APP_DATABASE_ID;
