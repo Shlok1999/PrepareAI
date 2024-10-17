@@ -1,4 +1,4 @@
-import { Client, Databases } from 'appwrite';
+import { Account, Client, Databases } from 'appwrite';
 import questionData from './questionData';
 const client = new Client();
 client
@@ -10,25 +10,26 @@ const databases = new Databases(client);
 const databaseId = process.env.REACT_APP_DATABASE_ID;
 const collectionId = process.env.REACT_APP_COLLECTION_ID_QUESTION
 
-const addQuestionsToAppwrite = async () => {
-  try {
-    for (let question of questionData) {
-      await databases.createDocument(
-        databaseId,
-        collectionId,
-        'unique()', // Generate unique ID for each document
-        {
-          question: question.question,
-          options: question.options,
-          correctAnswer: question.correctAnswer
-        }
-      );
-    }
-  } catch (error) {
-    console.error('Error adding questions:', error);
-  }
-};
+// const addQuestionsToAppwrite = async () => {
+//   try {
+//     for (let question of questionData) {
+//       await databases.createDocument(
+//         databaseId,
+//         collectionId,
+//         'unique()', // Generate unique ID for each document
+//         {
+//           question: question.question,
+//           options: question.options,
+//           correctAnswer: question.correctAnswer
+//         }
+//       );
+//     }
+//   } catch (error) {
+//     console.error('Error adding questions:', error);
+//   }
+// };
+// addQuestionsToAppwrite();
 
-addQuestionsToAppwrite();
+const account = new Account(client);
 
-export { client, databases };
+export { client, databases, account };

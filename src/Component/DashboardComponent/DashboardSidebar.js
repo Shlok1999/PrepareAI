@@ -19,12 +19,12 @@ function DashboardSidebar({ onSectionChange }) {
             {isOpen && (
                 <div className="sidebar-content">
                     <ul>
-                    <li onClick={() => onSectionChange('syllabus')}>Syllabus</li>
-            <li onClick={() => onSectionChange('testPerformance')}>Test Performance</li>
-            <li onClick={() => onSectionChange('profileSettings')}>Profile & Settings</li>
-            <li onClick={() => onSectionChange('resources')}>Study Resources</li>
-            <li onClick={() => onSectionChange('progress')}>Achievements & Progress</li>
-                        
+                        <li onClick={() => onSectionChange('syllabus')}>Syllabus</li>
+                        <li onClick={() => onSectionChange('testPerformance')}>Upcoming Test</li>
+                        <li onClick={() => onSectionChange('profileSettings')}>Profile & Settings</li>
+                        <li onClick={() => onSectionChange('resources')}>Study Resources</li>
+                        <li onClick={() => onSectionChange('progress')}>Achievements & Progress</li>
+
                         {/* Add more sections as needed */}
                     </ul>
                 </div>

@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InfoForm from '../Component/InfoForm';
+import LoginComponent from '../Component/AuthComponent/LoginComponent';
+import { account } from '../appwrite/appwriteConfig';
 import '../Style/Homepage.css';
 
 function Homepage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // State for login modal
     const [isLoggedIn, setIsLoggedIn] = useState(false); // Track if user is logged in
     const [showDropdown, setShowDropdown] = useState(false); // For showing profile dropdown
+    const [user,setUser] = useState(null);//Store User data after login
 
-    // Modal control
+    // Modal control for InfoForm
     const openModal = () => {
         setIsModalOpen(true);
     };
@@ -16,9 +20,52 @@ function Homepage() {
         setIsModalOpen(false);
     };
 
+    // Modal control for login
+    const openLoginModal = () => {
+        setIsLoginModalOpen(true);
+    };
+
+    const closeLoginModal = () => {
+        setIsLoginModalOpen(false);
+    };
+
     // Pseudo login function
-    const handleLogin = () => {
-        setIsLoggedIn(true); // Simulates logging in
+    const handleLogin =async () => {
+        try {
+            const userData = await account.get(); 
+            setUser(userData);
+            setIsLoggedIn(true);
+            closeLoginModal();
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+
+    useEffect(() => {
+        const getUserData = async () => {
+            try {
+                const userData = await account.get(); // Fetch user data from Appwrite session
+                setUser(userData);
+                setIsLoggedIn(true);
+            } catch (error) {
+                console.error('No session found:', error);
+            }
+        };
+
+        getUserData();
+    }, []);
+
+    console.log(isLoggedIn)
+
+    const handleLogout = async () => {
+        try {
+            await account.deleteSession('current'); // End user session
+            setIsLoggedIn(false); // Simulate logging out
+            setUser(null); // Clear user data
+            setShowDropdown(false); // Hide dropdown
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
     };
 
     // Toggle the dropdown for profile options
@@ -27,17 +74,14 @@ function Homepage() {
     };
 
     // Pseudo logout function
-    const handleLogout = () => {
-        setIsLoggedIn(false); // Simulates logging out
-        setShowDropdown(false); // Hide the dropdown
-    };
+    
 
     return (
         <div className="main-container">
             {/* Top Right Login/Profile Button */}
             <div className="top-right-container">
                 {!isLoggedIn ? (
-                    <button className="login-button" onClick={handleLogin}>
+                    <button className="login-button" onClick={openLoginModal}>
                         Login
                     </button>
                 ) : (
@@ -74,7 +118,9 @@ function Homepage() {
                     {/* The animated gradient section */}
                 </div>
             </div>
-            <InfoForm isOpen={isModalOpen} onClose={closeModal} /> {/* Modal rendering */}
+
+            <InfoForm isOpen={isModalOpen} onClose={closeModal} /> {/* InfoForm modal rendering */}
+            {isLoginModalOpen && <LoginComponent onClose={closeLoginModal} handleLogin={handleLogin} />} {/* Login modal rendering */}
         </div>
     );
 }
