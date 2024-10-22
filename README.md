@@ -3,6 +3,10 @@
 ## Project Overview
 StudyAI is an innovative platform designed to democratize competitive exam preparation by providing high-quality, personalized study materials and test preparation resources to all aspirants, regardless of their socioeconomic background.
 
+## Gathering data
+- [ ] Got easy level questions of Physics Chemistry math and Biology 
+- [ ] To structure these questions perfectly
+
 ## Technologies
 
 ### Frontend

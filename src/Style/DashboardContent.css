@@ -1,19 +1,24 @@
 /* Main content area */
 .dashboard-content {
-    margin-left: 250px; /* Matches the width of the sidebar */
-    padding: 20px;
-    transition: margin-left 0.3s ease;
-  }
-  
-  /* Adjust margin when the sidebar is collapsed */
-  .dashboard-sidebar.collapsed + .dashboard-content {
-    margin-left: 60px; /* Adjust margin when sidebar is collapsed */
-  }
-  
-  /* Dashboard container */
-  .dashboard-container {
-    display: flex;
-    flex-direction: row;
-    min-height: 100vh;
-  }
-  
+  margin-left: 250px;
+  /* Matches the width of the sidebar */
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Adjust margin when the sidebar is collapsed */
+.dashboard-sidebar.collapsed+.dashboard-content {
+  margin-left: 60px;
+  /* Adjust margin when sidebar is collapsed */
+}
+
+/* Dashboard container */
+.dashboard-container {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+.dashboard-content div{
+  text-align: center;
+}
