@@ -1,5 +1,7 @@
 import React from 'react';
 import '../../Style/DashboardContent.css'; // Add CSS for styling content
+import Syllabus from './Syllabus';
+import ProfileSettings from './ProfileSettings';
 
 function DashboardContent({ selectedSection }) {
   return (
@@ -7,7 +9,8 @@ function DashboardContent({ selectedSection }) {
       {selectedSection === 'syllabus' && (
         <div>
           <h2>Syllabus</h2>
-          <p>Here you can view the syllabus for your courses.</p>
+          {/* <p>Here you can view the syllabus for your courses.</p> */}
+          <Syllabus/>
         </div>
       )}
       {selectedSection === 'testPerformance' && (
@@ -19,7 +22,7 @@ function DashboardContent({ selectedSection }) {
       {selectedSection === 'profileSettings' && (
         <div>
           <h2>Profile & Settings</h2>
-          <p>Update your profile and configure your account settings here.</p>
+          <ProfileSettings/>
         </div>
       )}
       {selectedSection === 'resources' && (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { account } from '../../appwrite/appwriteConfig';
+import { account, databases } from '../../appwrite/appwriteConfig';
 import '../../Style/Registration.css'; // Create a corresponding CSS file for styling
 
 function StudentRegister() {
@@ -10,8 +10,7 @@ function StudentRegister() {
     const [phone, setPhone] = useState('');
     const [classLevel, setClassLevel] = useState('11'); // Default class is 11
     const [exam, setExam] = useState('IIT-JEE'); // Default exam is IIT-JEE
-    const [parentPhone, setParentPhone] = useState('');
-    const [parentEmail, setParentEmail] = useState('');
+    const [parent_phone, setParentPhone] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false); // State to manage loading
@@ -21,7 +20,7 @@ function StudentRegister() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        
+    
         try {
             // Create a new user account in Appwrite
             const userResponse = await account.create(
@@ -30,17 +29,39 @@ function StudentRegister() {
                 password,
                 name
             );
-
-            // You can optionally save additional user data in Appwrite's database (for example, class, exam, parent details)
-
-            setSuccessMessage('Registration successful!');
+            setSuccessMessage('Registration successful! User created.');
+    
+            // Save additional user data in Appwrite's database
+            try {
+                const userInDb = await databases.createDocument(
+                    process.env.REACT_APP_DATABASE_ID,
+                    process.env.REACT_APP_STUDENT_COLL_ID,
+                    'unique()', // Unique document ID
+                    {
+                        name: name,
+                        email: email,
+                        password: password,
+                        phone: phone,
+                        classLevel: classLevel,
+                        exam: exam,
+                        parent_phone: parent_phone,
+                    }
+                );
+    
+                if (userInDb) {
+                    console.log("Student added to DB:", userInDb);
+                    setSuccessMessage('Student data saved successfully!');
+                }
+            } catch (dbError) {
+                setErrorMessage('Failed to save student in the database.');
+                console.error('Database error:', dbError);
+            }
         } catch (error) {
             setErrorMessage('Registration failed. Please try again.');
-            console.error('Error registering user:', error);
-        }
-        finally{
+            console.error('Registration error:', error);
+        } finally {
             setIsLoading(false);
-            window.location.reload();
+            // Optionally reload page or redirect user after successful registration
         }
     };
 
@@ -114,18 +135,11 @@ function StudentRegister() {
                     <label>Parent's Phone (Optional)</label>
                     <input
                         type="tel"
-                        value={parentPhone}
+                        value={parent_phone}
                         onChange={(e) => setParentPhone(e.target.value)}
                     />
                 </div>
-                <div className="input-group">
-                    <label>Parent's Email (Optional)</label>
-                    <input
-                        type="email"
-                        value={parentEmail}
-                        onChange={(e) => setParentEmail(e.target.value)}
-                    />
-                </div>
+               
                 <button type="submit" className="submit-button">
                     Register
                 </button>
