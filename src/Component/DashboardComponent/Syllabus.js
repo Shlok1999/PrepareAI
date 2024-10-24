@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import '../../Style/Syllabus.css'; // Add a custom CSS file for styling
+import '../../Style/Syllabus.css'; // Add custom CSS for loader and syllabus
 
 function Syllabus() {
   const [syllabus, setSyllabus] = useState([]);
@@ -30,7 +30,7 @@ function Syllabus() {
   }, []);
 
   // Get subjects from the first week's data
-  const subjects = syllabus.length > 0 ? Object.keys(syllabus[0]).filter(key => key !== 'week') : [];
+  const subjects = syllabus.length > 0 ? Object.keys(syllabus[0]).filter(key => key !== 'week' && key !== 'month') : [];
 
   // Handle subject card click
   const handleCardClick = (subject) => {
@@ -38,7 +38,14 @@ function Syllabus() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    // Loader display during fetch
+    return (
+      <div className="loader-container">
+        {[1, 2, 3].map((_, index) => (
+          <div key={index} className="loader-card"></div>
+        ))}
+      </div>
+    );
   }
 
   if (error) {
@@ -51,7 +58,7 @@ function Syllabus() {
         <div className="subject-card-container">
           {subjects.map((subject, index) => (
             <div key={index} className="subject-card" onClick={() => handleCardClick(subject)}>
-              <img src={`/${subject.toLowerCase()}.png`} alt={subject} className="subject-logo" />
+              <img src={`https://img.icons8.com/physics`} alt={subject} className="subject-logo" />
               <h3>{subject}</h3>
             </div>
           ))}
@@ -61,11 +68,11 @@ function Syllabus() {
           <h2>{selectedSubject} - Monthly Syllabus</h2>
           {syllabus.map((weekData, index) => (
             <div key={index} className="monthly-syllabus">
-              <h3>Month {weekData.week}</h3>
+              <h3>Month {index+1}</h3>
               {weekData[selectedSubject].map((topic, topicIndex) => (
                 <div key={topicIndex} className="syllabus-topic">
                   <span>{topic}</span>
-                  <a href={`/`} className="test-link">Test</a> {/* Link to the test page or route */}
+                  <a href={`#`} className="test-link">Go To Test</a> {/* Link to the test page or route */}
                 </div>
               ))}
             </div>

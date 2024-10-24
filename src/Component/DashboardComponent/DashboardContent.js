@@ -8,7 +8,6 @@ function DashboardContent({ selectedSection }) {
     <div className="dashboard-content">
       {selectedSection === 'syllabus' && (
         <div>
-          <h2>Syllabus</h2>
           {/* <p>Here you can view the syllabus for your courses.</p> */}
           <Syllabus/>
         </div>
