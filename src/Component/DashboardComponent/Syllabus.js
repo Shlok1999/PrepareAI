@@ -7,7 +7,7 @@ function Syllabus() {
   const [error, setError] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null); // State to store selected subject
   const exam = 'IIT-JEE';
-  const month_left = 7;
+  const month_left = 12;
 
   // Fetch syllabus data
   const fetchSyllabus = async () => {
