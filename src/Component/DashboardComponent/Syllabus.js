@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { account } from '../../appwrite/appwriteConfig';
 import '../../Style/Syllabus.css'; // Add custom CSS for loader and syllabus
 
 function Syllabus() {
+
+  const studentCollection = process.env.REACT_APP_STUDENT_COLL_ID;
+  const dbId = process.env.REACT_APP_DATABASE_ID
+
   const [syllabus, setSyllabus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

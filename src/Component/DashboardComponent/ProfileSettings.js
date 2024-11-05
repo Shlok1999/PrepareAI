@@ -17,6 +17,7 @@ function ProfileSettings() {
                 // Step 1: Get logged-in user info
                 const user = await account.get();
                 const userEmail = user.email;
+                console.log(userEmail)
 
                 // Step 2: Query the student collection by the user's email
                 const response = await databases.listDocuments(databaseId, collectionId, [

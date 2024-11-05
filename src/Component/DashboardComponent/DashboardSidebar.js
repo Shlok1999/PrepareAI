@@ -1,7 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { account } from '../../appwrite/appwriteConfig';
 import '../../Style/DashboardSidebar.css'; // Sidebar specific styling
 
 function DashboardSidebar({ onSectionChange }) {
+
+    const [userName, setUserName] = useState('');
+
+    useEffect(()=>{
+        const getUsername = async()=>{
+            try {
+                const response = await account.get();
+                setUserName(response.name.split(" ")[0]);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        getUsername();
+    },[])
+
+    
     const [isOpen, setIsOpen] = useState(true); // Sidebar is open by default
 
     // Toggle sidebar visibility
@@ -19,6 +36,7 @@ function DashboardSidebar({ onSectionChange }) {
             {isOpen && (
                 <div className="sidebar-content">
                     <ul>
+                        <li> <strong>{userName}</strong></li>
                         <li onClick={() => onSectionChange('syllabus')}>Syllabus</li>
                         <li onClick={() => onSectionChange('testPerformance')}>Upcoming Test</li>
                         <li onClick={() => onSectionChange('profileSettings')}>Profile & Settings</li>
