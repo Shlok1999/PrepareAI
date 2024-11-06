@@ -99,7 +99,7 @@ function Syllabus() {
               {weekData[selectedSubject].map((topic, topicIndex) => (
                 <div key={topicIndex} className="syllabus-topic">
                   <span>{topic}</span>
-                  <a href={`#`} className="test-link">Go To Test</a>
+                  {/* <a href={`#`} className="test-link">Go To Test</a> */}
                 </div>
               ))}
             </div>
