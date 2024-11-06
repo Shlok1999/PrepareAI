@@ -1,28 +1,53 @@
 import React, { useEffect, useState } from 'react';
-import { account } from '../../appwrite/appwriteConfig';
-import '../../Style/Syllabus.css'; // Add custom CSS for loader and syllabus
+import { account, databases } from '../../appwrite/appwriteConfig';
+import '../../Style/Syllabus.css';
+import { Query } from 'appwrite';
 
 function Syllabus() {
-
   const studentCollection = process.env.REACT_APP_STUDENT_COLL_ID;
-  const dbId = process.env.REACT_APP_DATABASE_ID
+  const dbId = process.env.REACT_APP_DATABASE_ID;
 
   const [syllabus, setSyllabus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedSubject, setSelectedSubject] = useState(null); // State to store selected subject
+  const [selectedSubject, setSelectedSubject] = useState(null);
+
   const exam = 'IIT-JEE';
   const month_left = 12;
 
-  // Fetch syllabus data
-  const fetchSyllabus = async () => {
+  const fetchOrGenerateSyllabus = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/student/syllabus?exam=${exam}&month_left=${month_left}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch syllabus");
+      const user = await account.get();
+      const userEmail = user.email;
+
+      const studentDoc = await databases.listDocuments(dbId, studentCollection, [
+        Query.equal('email', userEmail)
+      ]);
+
+      if (studentDoc.documents.length > 0) {
+        const documentId = studentDoc.documents[0].$id;
+        const existingSyllabus = studentDoc.documents[0].syllabus;
+
+        if (existingSyllabus) {
+          setSyllabus(JSON.parse(existingSyllabus)); // Parse JSON when retrieving it
+        } else {
+          const response = await fetch(`http://localhost:5000/student/syllabus?exam=${exam}&month_left=${month_left}`);
+          if (!response.ok) throw new Error("Failed to fetch syllabus");
+
+          const data = await response.json();
+          setSyllabus(data.syllabus);
+
+          // Save the JSON syllabus as a string in Appwrite
+          await databases.updateDocument(dbId, studentCollection, documentId, {
+            syllabus: JSON.stringify(data.syllabus) // Stringify JSON before saving
+          });
+
+          console.log("Syllabus saved to student collection");
+        }
+      } else {
+        throw new Error("Student document not found.");
       }
-      const data = await response.json();
-      setSyllabus(data.syllabus);
+
       setLoading(false);
     } catch (error) {
       setError(error.message);
@@ -31,19 +56,16 @@ function Syllabus() {
   };
 
   useEffect(() => {
-    fetchSyllabus();
+    fetchOrGenerateSyllabus();
   }, []);
 
-  // Get subjects from the first week's data
   const subjects = syllabus.length > 0 ? Object.keys(syllabus[0]).filter(key => key !== 'week' && key !== 'month') : [];
 
-  // Handle subject card click
   const handleCardClick = (subject) => {
     setSelectedSubject(subject);
   };
 
   if (loading) {
-    // Loader display during fetch
     return (
       <div className="loader-container">
         {[1, 2, 3].map((_, index) => (
@@ -73,11 +95,11 @@ function Syllabus() {
           <h2>{selectedSubject} - Monthly Syllabus</h2>
           {syllabus.map((weekData, index) => (
             <div key={index} className="monthly-syllabus">
-              <h3>Month {index+1}</h3>
+              <h3>Month {index + 1}</h3>
               {weekData[selectedSubject].map((topic, topicIndex) => (
                 <div key={topicIndex} className="syllabus-topic">
                   <span>{topic}</span>
-                  <a href={`#`} className="test-link">Go To Test</a> {/* Link to the test page or route */}
+                  <a href={`#`} className="test-link">Go To Test</a>
                 </div>
               ))}
             </div>
