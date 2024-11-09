@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { account, databases } from '../../appwrite/appwriteConfig';
 import '../../Style/Syllabus.css';
 import { Query } from 'appwrite';
@@ -98,8 +99,11 @@ function Syllabus() {
               <h3>Month {index + 1}</h3>
               {weekData[selectedSubject].map((topic, topicIndex) => (
                 <div key={topicIndex} className="syllabus-topic">
-                  <span>{topic}</span>
+                  {/* <span>{topic}</span> */}
                   {/* <a href={`#`} className="test-link">Go To Test</a> */}
+                  <Link style={{textDecoration: 'none', color:'black', fontWeight: 'bold'}} to={`/topics/${encodeURIComponent(topic)}`} className='topic-link'>
+                    <span>{topic}</span>
+                  </Link>
                 </div>
               ))}
             </div>
