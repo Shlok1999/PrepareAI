@@ -1,0 +1,45 @@
+.biweekly-test-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.question-card, .solution-card {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.solution-card p, .question-card p{
+    margin-top: 1rem;
+}
+
+.correct {
+    border-color: green;
+}
+
+.incorrect {
+    border-color: red;
+}
+
+.option {
+    display: block;
+    margin: 10px 0;
+}
+
+.next-button {
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.results-container {
+    padding-top: 20px;
+}
