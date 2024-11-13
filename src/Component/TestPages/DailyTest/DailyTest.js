@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '../../../Style/DailyTest.css';
+import { account, databases } from '../../../appwrite/appwriteConfig';
 
 function DailyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kinematics 1D"] }) {
     const [questions, setQuestions] = useState([]);
@@ -9,10 +10,31 @@ function DailyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kine
     const [score, setScore] = useState(0);
     const [timeTaken, setTimeTaken] = useState(0);
 
+    //Get Student ID
+    const [studentID,setStudentID] = useState('');
+    useEffect(()=>{
+        const getStudentId = async()=>{
+            try {
+                const response = await account.get();
+                const id = response.$id
+                setStudentID(id);
+                console.log(id);
+            } catch (error) {
+                console.log("Error: ",error);
+            }
+        }; 
+        getStudentId();
+    },[])
+
     const currentQuestion = questions[currentQuestionIndex];
+
+    const hasFetched = useRef(false);//Track if fetch has already happened
 
     // Fetch questions from the backend
     const fetchTest = useCallback(async () => {
+        if(hasFetched.current) return; //Prevents multiple fetches
+        hasFetched.current = true; //Mark fetch as done
+
         try {
             const response = await fetch(`http://localhost:5000/student/generateDPP`, {
                 method: 'POST',
@@ -20,7 +42,7 @@ function DailyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kine
                 body: JSON.stringify({ subject, topics })
             });
             const data = await response.json();
-            setQuestions(data.questions);
+           setQuestions(data.questions || []);
         } catch (error) {
             console.error("Error fetching questions:", error);
         }
@@ -30,16 +52,7 @@ function DailyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kine
         fetchTest();
     }, [fetchTest]);
 
-    // Timer to track time taken
-    useEffect(() => {
-        if (isSubmitted) return;
 
-        const timer = setInterval(() => {
-            setTimeTaken(prevTime => prevTime + 1);
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [isSubmitted]);
 
     // Handle answer selection
     const handleAnswerSelect = (answer) => {
@@ -57,16 +70,23 @@ function DailyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kine
     // Calculate score and handle submission
     const calculateScore = () => {
         let finalScore = 0;
-        questions.forEach(q => {
+        
+        questions.forEach((q) => {
             const selectedAnswer = selectedAnswers[q.id];
+            
             if (selectedAnswer === q.correctAnswer) {
                 finalScore += 4; // +4 for correct answers
-            } else if (selectedAnswer) {
+            } else if (selectedAnswer !== undefined && selectedAnswer !== q.correctAnswer) {
                 finalScore -= 1; // -1 for wrong answers
             }
+            
+            // Log to debug the answers and score calculation
+            console.log(`Question ID: ${q.id}, Selected: ${selectedAnswer}, Correct: ${q.correctAnswer}, Current Score: ${finalScore}`);
         });
+        
         setScore(finalScore);
         setIsSubmitted(true);
+        saveTestResults(finalScore);
     };
 
     // Restart quiz function
@@ -79,6 +99,40 @@ function DailyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kine
         setIsSubmitted(false);
         fetchTest();
     };
+
+    //Save Daily Test to Appwrite
+    let databaseId = process.env.REACT_APP_DATABASE_ID;
+    let daily_test_collection = process.env.REACT_APP_DAILY_TEST_COLLECTION;
+
+
+    const saveTestResults = async (finalScore)=>{
+        const testQuestionDetails = JSON.stringify(
+            questions.map(q=>({
+                question: q.question,
+                selectedAnswers: selectedAnswers[q.id] || 'Unanswered',
+                correctAnswer: q.correctAnswer,
+                solution: q.solution
+            }))
+        );
+
+        try {
+            await databases.createDocument(databaseId, daily_test_collection, 'unique()',{
+                student_id: studentID,
+                subject,
+                topics,
+                test_question_details: testQuestionDetails,
+                marks: finalScore
+            })
+
+            console.log("Test results saved successfully...")
+        } catch (error) {
+            console.error("Error saving test results", error);
+        }
+    }
+
+    
+
+
 
     return (
         <div className="quiz-container">
@@ -113,19 +167,32 @@ function DailyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kine
                     <button onClick={handleRestart} className="restart-button">Restart Quiz</button>
 
                     <div className="answers-container">
-                        {questions.map((q, index) => (
-                            <div
-                                key={index}
-                                className={`answer-card ${selectedAnswers[q.id] === q.correctAnswer ? 'correct' : selectedAnswers[q.id] ? 'incorrect' : 'unanswered'}`}
-                            >
-                                <h3>Question {index + 1}</h3>
-                                <p dangerouslySetInnerHTML={{ __html: q.question }}></p>
-                                <p><strong>Your Answer:</strong> {selectedAnswers[q.id] || 'Unanswered'}</p>
-                                <p><strong>Correct Answer:</strong> {q.correctAnswer}</p>
-                                <p><strong>Solution:</strong> {q.solution}</p>
-                            </div>
-                        ))}
-                    </div>
+        {questions.map((q, index) => (
+            <div
+                key={index}
+                className={`answer-card ${selectedAnswers[q.id] === q.correctAnswer ? 'correct' : selectedAnswers[q.id] ? 'incorrect' : 'unanswered'}`}
+            >
+                <h3>Question {index + 1}</h3>
+                {/* Render the question HTML */}
+                <p dangerouslySetInnerHTML={{ __html: q.question }}></p>
+                
+                {/* Render the selected answer, handling "Unanswered" in plain text */}
+                <p><strong>Your Answer:</strong> 
+                    {selectedAnswers[q.id] ? (
+                        <span dangerouslySetInnerHTML={{ __html: selectedAnswers[q.id] }}></span>
+                    ) : (
+                        'Unanswered'
+                    )}
+                </p>
+
+                {/* Render the correct answer HTML */}
+                <p><strong>Correct Answer:</strong> <span dangerouslySetInnerHTML={{ __html: q.correctAnswer }}></span></p>
+
+                {/* Render the solution HTML */}
+                <p><strong>Solution:</strong> <span dangerouslySetInnerHTML={{ __html: q.solution }}></span></p>
+            </div>
+        ))}
+    </div>
                 </div>
             )}
         </div>

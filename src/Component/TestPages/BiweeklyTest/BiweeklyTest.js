@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '../../../Style/BiweeklyTest.css';
 
 function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kinematics 1D"] }) {
@@ -10,9 +10,14 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
     const [timeTaken, setTimeTaken] = useState(0);
 
     const currentQuestion = questions[currentQuestionIndex];
+    const hasFetched = useRef(false);//Track if fetch has already happened
+
 
     // Fetch questions from the backend only once when the component mounts
-    const fetchQuestions = async () => {
+    const fetchQuestions = useCallback(async () => {
+        if(hasFetched.current) return;
+        hasFetched.current = true;
+
         try {
             const response = await fetch(`http://localhost:5000/student/generateBiWeeklyTest`, {
                 method: 'POST',
@@ -20,11 +25,12 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
                 body: JSON.stringify({ subject, topics })
             });
             const data = await response.json();
+            console.log(data.questions)
             if (data.questions) setQuestions(data.questions); // Only set if questions exist
         } catch (error) {
             console.error("Error fetching questions:", error);
         }
-    };
+    });
 
     useEffect(() => {
         // Call fetchQuestions only on mount
