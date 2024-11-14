@@ -1,0 +1,43 @@
+/* Main container for test history */
+.test-history-main {
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+/* Tabs container */
+.tab-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+/* Tab button styling */
+.tab-button {
+    flex: 1;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    background-color: #f2f2f2;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+.tab-button.active {
+    background-color: #e91e63;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+/* Content area for selected history */
+.history-content {
+    padding: 15px;
+    background-color: #fafafa;
+    border-radius: 8px;
+}

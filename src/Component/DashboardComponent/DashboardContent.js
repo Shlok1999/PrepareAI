@@ -2,6 +2,7 @@ import React from 'react';
 import '../../Style/DashboardContent.css'; // Add CSS for styling content
 import Syllabus from './Syllabus';
 import ProfileSettings from './ProfileSettings';
+import TestHistoryMain from '../TestPages/TestHistory/TestHistoryMain';
 
 function DashboardContent({ selectedSection }) {
   return (
@@ -34,6 +35,7 @@ function DashboardContent({ selectedSection }) {
         <div>
           <h2>Achievements & Progress</h2>
           <p>View your milestones and progress over time.</p>
+          <TestHistoryMain/>
         </div>
       )}
     </div>

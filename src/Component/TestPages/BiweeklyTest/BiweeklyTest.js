@@ -1,7 +1,24 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { account, databases } from '../../../appwrite/appwriteConfig';
 import '../../../Style/BiweeklyTest.css';
 
 function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kinematics 1D"] }) {
+
+    const [studentID,setStudentID] = useState('');
+    useEffect(()=>{
+        const getStudentId = async()=>{
+            try {
+                const response = await account.get();
+                const id = response.$id
+                setStudentID(id);
+                console.log(id);
+            } catch (error) {
+                console.log("Error: ",error);
+            }
+        }; 
+        getStudentId();
+    },[])
+    
     const [questions, setQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -25,7 +42,6 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
                 body: JSON.stringify({ subject, topics })
             });
             const data = await response.json();
-            console.log(data.questions)
             if (data.questions) setQuestions(data.questions); // Only set if questions exist
         } catch (error) {
             console.error("Error fetching questions:", error);
@@ -75,6 +91,35 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
         setScore(finalScore);
         setIsSubmitted(true);
     };
+
+    let databaseId = process.env.REACT_APP_DATABASE_ID;
+    let biweekly_test_collection = process.env.REACT_APP_BIWEEKLY_TEST_COLLECTION;
+
+    const saveTestResults = async (finalScore)=>{
+        const testQuestionDetails = JSON.stringify(
+            questions.map(q=>({
+                question: q.question,
+                selectedAnswers: selectedAnswers[q.id] || 'Unanswered',
+                correctAnswer: q.correctAnswer,
+                solution: q.solution
+            }))
+        );
+
+        try {
+            await databases.createDocument(databaseId, biweekly_test_collection, 'unique()',{
+                student_id: studentID,
+                subject,
+                topics,
+                test_question_details: testQuestionDetails,
+                marks: finalScore
+            })
+
+            console.log("Test results saved successfully...")
+        } catch (error) {
+            console.error("Error saving test results", error);
+        }
+    }
+
 
     if (!questions || questions.length === 0) return <div>Loading questions...</div>;
 

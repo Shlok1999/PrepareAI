@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { account, databases } from '../../appwrite/appwriteConfig';
 import '../../Style/Syllabus.css';
@@ -16,7 +16,12 @@ function Syllabus() {
   const exam = 'IIT-JEE';
   const month_left = 12;
 
-  const fetchOrGenerateSyllabus = async () => {
+  const hasFetched = useRef(false);
+
+
+  const fetchOrGenerateSyllabus = useCallback(async () => {
+    if(hasFetched.current) return;
+    hasFetched.current = true;
     try {
       const user = await account.get();
       const userEmail = user.email;
@@ -54,7 +59,7 @@ function Syllabus() {
       setError(error.message);
       setLoading(false);
     }
-  };
+  });
 
   useEffect(() => {
     fetchOrGenerateSyllabus();

@@ -8,6 +8,7 @@ import RegistrationPage from './Page/RegistrationPage';
 import TopicPage from './Page/TopicPage';
 import BiweeklyTest from './Component/TestPages/BiweeklyTest/BiweeklyTest';
 import DailyTest from './Component/TestPages/DailyTest/DailyTest';
+import TestHistoryMain from './Component/TestPages/TestHistory/TestHistoryMain';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path='/topics/:topicName' element={<TopicPage/>}/>
           <Route path='/biweekly-test' element={<BiweeklyTest/>}/>
           <Route path='/test/dpp' element={<DailyTest/>}/>
+          <Route path='/test-history' element={<TestHistoryMain/>}/>
         </Routes>
       </Router>
   );
