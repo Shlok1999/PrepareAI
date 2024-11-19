@@ -7,14 +7,15 @@ import { Query } from 'appwrite';
 function Syllabus() {
   const studentCollection = process.env.REACT_APP_STUDENT_COLL_ID;
   const dbId = process.env.REACT_APP_DATABASE_ID;
-
+  const [exam,setExam] = useState('');
+  const [monthLeft, setMonthLeft] = useState(8);
   const [syllabus, setSyllabus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
 
-  const exam = 'IIT-JEE';
-  const month_left = 12;
+  // const exam = 'IIT-JEE';
+  // const month_left = 12;
 
   const hasFetched = useRef(false);
 
@@ -33,11 +34,16 @@ function Syllabus() {
       if (studentDoc.documents.length > 0) {
         const documentId = studentDoc.documents[0].$id;
         const existingSyllabus = studentDoc.documents[0].syllabus;
+        const exam_taken = studentDoc.documents[0].exam;
+        console.log(exam_taken);
+
+        setExam(exam_taken);
+        console.log(exam)
 
         if (existingSyllabus) {
           setSyllabus(JSON.parse(existingSyllabus)); // Parse JSON when retrieving it
         } else {
-          const response = await fetch(`http://localhost:5000/student/syllabus?exam=${exam}&month_left=${month_left}`);
+          const response = await fetch(`http://localhost:5000/student/syllabus?exam=${exam_taken}&month_left=${monthLeft}`);
           if (!response.ok) throw new Error("Failed to fetch syllabus");
 
           const data = await response.json();
@@ -53,7 +59,7 @@ function Syllabus() {
       } else {
         throw new Error("Student document not found.");
       }
-
+      console.log(exam)
       setLoading(false);
     } catch (error) {
       setError(error.message);
@@ -63,7 +69,7 @@ function Syllabus() {
 
   useEffect(() => {
     fetchOrGenerateSyllabus();
-  }, []);
+  }, [exam, monthLeft]);
 
   const subjects = syllabus.length > 0 ? Object.keys(syllabus[0]).filter(key => key !== 'week' && key !== 'month') : [];
 

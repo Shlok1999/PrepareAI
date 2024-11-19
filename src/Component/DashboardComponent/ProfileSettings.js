@@ -62,6 +62,7 @@ function ProfileSettings() {
                     <p><strong>Phone:</strong> {studentData?.phone}</p>
                     <p><strong>Class:</strong> {studentData?.classLevel}</p>
                     <p><strong>Exam:</strong> {studentData?.exam}</p>
+                    <p><strong>Exam Year</strong> {studentData.exam_year}</p>
                      <p><strong>Parent's Phone:</strong> {studentData?.parentPhone}</p>
                      <p><strong>Parent's Email:</strong> {studentData?.parentEmail}</p>
                 </div>

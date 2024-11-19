@@ -3,36 +3,35 @@ import { account, databases } from '../../../appwrite/appwriteConfig';
 import '../../../Style/BiweeklyTest.css';
 
 function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "Kinematics 1D"] }) {
-
-    const [studentID,setStudentID] = useState('');
-    useEffect(()=>{
-        const getStudentId = async()=>{
+    const [studentID, setStudentID] = useState('');
+    useEffect(() => {
+        const getStudentId = async () => {
             try {
                 const response = await account.get();
-                const id = response.$id
+                const id = response.$id;
                 setStudentID(id);
                 console.log(id);
             } catch (error) {
-                console.log("Error: ",error);
+                console.log("Error: ", error);
             }
-        }; 
+        };
         getStudentId();
-    },[])
-    
+    }, []);
+
     const [questions, setQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState({});
+    const [explanations, setExplanations] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [score, setScore] = useState(0);
     const [timeTaken, setTimeTaken] = useState(0);
 
     const currentQuestion = questions[currentQuestionIndex];
-    const hasFetched = useRef(false);//Track if fetch has already happened
+    const hasFetched = useRef(false); // Track if fetch has already happened
 
-
-    // Fetch questions from the backend only once when the component mounts
+    // Fetch questions from the backend
     const fetchQuestions = useCallback(async () => {
-        if(hasFetched.current) return;
+        if (hasFetched.current) return;
         hasFetched.current = true;
 
         try {
@@ -42,16 +41,15 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
                 body: JSON.stringify({ subject, topics })
             });
             const data = await response.json();
-            if (data.questions) setQuestions(data.questions); // Only set if questions exist
+            if (data.questions) setQuestions(data.questions);
         } catch (error) {
             console.error("Error fetching questions:", error);
         }
-    });
+    }, [subject, topics]);
 
     useEffect(() => {
-        // Call fetchQuestions only on mount
         if (questions.length === 0) fetchQuestions();
-    }, []); // No dependencies so it only runs on mount
+    }, [fetchQuestions, questions]);
 
     // Timer to track time taken
     useEffect(() => {
@@ -70,6 +68,23 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
             ...prevAnswers,
             [currentQuestion.id]: answer
         }));
+    };
+
+    // Handle explanation input
+    const handleExplanationInput = (explanation) => {
+        setExplanations(prevExplanations => ({
+            ...prevExplanations,
+            [currentQuestion.id]: explanation
+        }));
+    };
+
+    // Navigate to the next question
+    const handleNext = () => {
+        if (!selectedAnswers[currentQuestion.id] || !explanations[currentQuestion.id]) {
+            alert('Please select an answer and provide an explanation before proceeding.');
+            return;
+        }
+
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         } else {
@@ -80,6 +95,7 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
     // Calculate score and handle submission
     const calculateScore = () => {
         let finalScore = 0;
+
         questions.forEach(q => {
             const selectedAnswer = selectedAnswers[q.id];
             if (selectedAnswer === q.correctAnswer) {
@@ -88,38 +104,41 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
                 finalScore -= 1; // -1 for wrong answers
             }
         });
+
         setScore(finalScore);
         setIsSubmitted(true);
+        saveTestResults(finalScore);
     };
 
-    let databaseId = process.env.REACT_APP_DATABASE_ID;
-    let biweekly_test_collection = process.env.REACT_APP_BIWEEKLY_TEST_COLLECTION;
+    // Save Biweekly Test results to Appwrite
+    const databaseId = process.env.REACT_APP_DATABASE_ID;
+    const biweekly_test_collection = process.env.REACT_APP_BIWEEKLY_TEST_COLLECTION;
 
-    const saveTestResults = async (finalScore)=>{
+    const saveTestResults = async (finalScore) => {
         const testQuestionDetails = JSON.stringify(
-            questions.map(q=>({
+            questions.map(q => ({
                 question: q.question,
                 selectedAnswers: selectedAnswers[q.id] || 'Unanswered',
                 correctAnswer: q.correctAnswer,
+                explanation: explanations[q.id] || 'No explanation provided',
                 solution: q.solution
             }))
         );
 
         try {
-            await databases.createDocument(databaseId, biweekly_test_collection, 'unique()',{
+            await databases.createDocument(databaseId, biweekly_test_collection, 'unique()', {
                 student_id: studentID,
                 subject,
                 topics,
                 test_question_details: testQuestionDetails,
                 marks: finalScore
-            })
+            });
 
-            console.log("Test results saved successfully...")
+            console.log("Test results saved successfully...");
         } catch (error) {
             console.error("Error saving test results", error);
         }
-    }
-
+    };
 
     if (!questions || questions.length === 0) return <div>Loading questions...</div>;
 
@@ -138,14 +157,21 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
                                     key={index}
                                     className={`option ${selectedAnswers[currentQuestion.id] === option ? 'selected' : ''}`}
                                     onClick={() => handleAnswerSelect(option)}
-                                    dangerouslySetInnerHTML={{ __html: option }} // Renders the HTML within the option text
-                                >
-                                </button>
+                                    dangerouslySetInnerHTML={{ __html: option }}
+                                />
                             ))}
                         </div>
-                        {currentQuestionIndex === questions.length - 1 && (
-                            <button onClick={calculateScore} className="submit-button">Submit</button>
-                        )}
+                        <div className="explanation">
+                            <input
+                            type='text'
+                                placeholder="Explain your answer..."
+                                value={explanations[currentQuestion.id] || ''}
+                                onChange={(e) => handleExplanationInput(e.target.value)}
+                            />
+                        </div>
+                        <button onClick={handleNext} className="next-button">
+                            {currentQuestionIndex === questions.length - 1 ? 'Submit' : 'Next'}
+                        </button>
                     </div>
                 ) : (
                     <div>Loading questions...</div>
@@ -164,6 +190,7 @@ function BiweeklyTest({ subject = "Physics", topics = ["Unit and Dimensions", "K
                                 <p dangerouslySetInnerHTML={{ __html: q.question }}></p>
                                 <p><strong>Your Answer:</strong> {selectedAnswers[q.id] || 'Unanswered'}</p>
                                 <p><strong>Correct Answer:</strong> {q.correctAnswer}</p>
+                                <p><strong>Your Explanation:</strong> {explanations[q.id] || 'No explanation provided'}</p>
                                 <p><strong>Solution:</strong> {q.solution}</p>
                             </div>
                         ))}

@@ -10,6 +10,7 @@ function StudentRegister() {
     const [phone, setPhone] = useState('');
     const [classLevel, setClassLevel] = useState('11'); // Default class is 11
     const [exam, setExam] = useState('IIT-JEE'); // Default exam is IIT-JEE
+    const [examYear,setExamYear] = useState(2024);
     const [parent_phone, setParentPhone] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -44,7 +45,9 @@ function StudentRegister() {
                         phone: phone,
                         classLevel: classLevel,
                         exam: exam,
+                        exam_year: examYear,
                         parent_phone: parent_phone,
+
                     }
                 );
     
@@ -129,6 +132,17 @@ function StudentRegister() {
                     >
                         <option value="IIT-JEE">IIT-JEE</option>
                         <option value="NEET">NEET</option>
+                    </select>
+                </div>
+                <div className="input-group">
+                    <label>Exam Year</label>
+                    <select
+                        value={exam}
+                        onChange={(e) => setExamYear(e.target.value)}
+                    >
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
                     </select>
                 </div>
                 <div className="input-group">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { databases } from '../../../appwrite/appwriteConfig';
+import { databases, account } from '../../../appwrite/appwriteConfig';
 import '../../../Style/DailyHistory.css';
+import { Query } from 'appwrite';
 
 function DailyHistory() {
     const [tests, setTests] = useState([]);
@@ -13,9 +14,12 @@ function DailyHistory() {
         if (hasFetched.current) return;
         hasFetched.current = true
         try {
+            const user = await account.get();
+            const studentId = user.$id;
             const response = await databases.listDocuments(
                 process.env.REACT_APP_DATABASE_ID,
-                process.env.REACT_APP_DAILY_TEST_COLLECTION
+                process.env.REACT_APP_DAILY_TEST_COLLECTION,
+                [Query.equal('student_id', studentId)]
             );
             const documents = response.documents.map(doc => ({
                 ...doc,
@@ -32,7 +36,7 @@ function DailyHistory() {
 
     return (
         <div className="test-history-list">
-            {tests.map((test) => (
+            {tests.map((test, index) => (
                 <div
                     key={test.$id}
                     className="test-item"
@@ -43,7 +47,7 @@ function DailyHistory() {
                         month: 'short',
                         year: 'numeric'
                     }).replace(/ /g, '-')}</span>
-                    <span>{test.topics.join(', ')}</span>
+                    <span>{test.topics.join(', ')} -{index+1}</span>
                     <span>Score: {test.marks}/40</span>
                 </div>
             ))}
@@ -59,11 +63,15 @@ function DailyHistory() {
                             </p>
                             <p>
                                 <strong>Your Answer:</strong>
-                                <span dangerouslySetInnerHTML={{ __html: q.selectedAnswer }} />
+                                <span dangerouslySetInnerHTML={{ __html: q.selectedAnswers }} />
                             </p>
                             <p>
                                 <strong>Correct Answer:</strong>
                                 <span dangerouslySetInnerHTML={{ __html: q.correctAnswer }} />
+                            </p>
+                            <p>
+                                <strong>Explanation Provided: </strong>
+                                <span dangerouslySetInnerHTML={{ __html: q.explanation }} />
                             </p>
                             <p>
                                 <strong>Solution:</strong>
