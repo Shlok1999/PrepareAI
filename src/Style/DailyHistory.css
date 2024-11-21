@@ -1,4 +1,7 @@
 /* Test list items */
+.test-history-main{
+    width: 800px;
+}
 .test-history-list .test-item {
     display: flex;
     justify-content: space-between;

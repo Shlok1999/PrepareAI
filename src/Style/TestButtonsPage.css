@@ -1,0 +1,51 @@
+.test-link-button {
+    background-color: #4caf50; /* Green for active buttons */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .test-link-button:hover:not(.disabled) {
+    background-color: #45a049; /* Darker green on hover for active buttons */
+  }
+  
+  .test-link-button.disabled {
+    background-color: #d3d3d3; /* Grey for disabled buttons */
+    color: #a9a9a9;
+    cursor: not-allowed; /* Show "not-allowed" cursor for disabled buttons */
+    pointer-events: none; /* Prevent any interaction */
+  }
+  
+  .test-button-wrapper {
+    margin: 10px;
+    position: relative;
+  }
+  
+  .subject-container h3 {
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  .topics-hover {
+    position: absolute;
+    top: 50%;
+    left: 105%;
+    transform: translateY(-50%);
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    display: none;
+    z-index: 1000;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+  
+  .test-button-wrapper:hover .topics-hover {
+    display: block;
+  }
+  

@@ -16,6 +16,7 @@ function LoginComponent({ onClose, handleLogin }) {
             handleLogin(); // If successful, mark as logged in
         } catch (error) {
             setErrorMessage('Login failed. Please check your credentials.');
+            alert(errorMessage)
             console.error('Error logging in:', error);
         }
     };

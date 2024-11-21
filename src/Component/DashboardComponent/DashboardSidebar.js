@@ -38,7 +38,7 @@ function DashboardSidebar({ onSectionChange }) {
                     <ul>
                         <li> <strong>{userName}</strong></li>
                         <li onClick={() => onSectionChange('syllabus')}>Syllabus</li>
-                        <li onClick={() => onSectionChange('testPerformance')}>Upcoming Test</li>
+                        <li onClick={() => onSectionChange('test')}>Go To Test</li>
                         <li onClick={() => onSectionChange('profileSettings')}>Profile & Settings</li>
                         <li onClick={() => onSectionChange('resources')}>Study Resources</li>
                         <li onClick={() => onSectionChange('progress')}>Achievements & Progress</li>

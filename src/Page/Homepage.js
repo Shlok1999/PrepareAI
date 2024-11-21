@@ -3,6 +3,7 @@ import InfoForm from '../Component/InfoForm';
 import LoginComponent from '../Component/AuthComponent/LoginComponent';
 import { account } from '../appwrite/appwriteConfig';
 import '../Style/Homepage.css';
+import { Link } from 'react-router-dom';
 
 function Homepage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -111,7 +112,15 @@ function Homepage() {
                         Sharpen your mind with the toughest questions designed for your success.
                     </p>
                     <button className="get-started-button" onClick={openModal}>
-                        Get Started
+                        {
+                            isLoggedIn?
+                            <div>
+                                <Link style={{textDecoration: 'none', color: 'white'}} to={'/dashboard'}>Go To Dashboard</Link>
+                            </div>
+                            :<div>
+                                <Link style={{textDecoration: 'none', color: 'white'}} to={'/login'}>Log In</Link>
+                            </div>
+                        }
                     </button>
                 </div>
                 <div className="animation-container">
