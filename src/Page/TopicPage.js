@@ -7,6 +7,12 @@ function TopicPage() {
   return (
     <div>
         <h1>{decodeURIComponent(topicName)}</h1>
+        <p>
+          We are working on the notes.
+        </p>
+        <p>
+          It will be ready soon
+        </p>
     </div>
   )
 }
