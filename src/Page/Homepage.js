@@ -111,14 +111,14 @@ function Homepage() {
                     <p className="subheading">
                         Sharpen your mind with the toughest questions designed for your success.
                     </p>
-                    <button className="get-started-button" onClick={openModal}>
+                    <button className="get-started-button">
                         {
                             isLoggedIn?
                             <div>
                                 <Link style={{textDecoration: 'none', color: 'white'}} to={'/dashboard'}>Go To Dashboard</Link>
                             </div>
                             :<div>
-                                <Link style={{textDecoration: 'none', color: 'white'}} to={'/login'}>Log In</Link>
+                                <p onClick={openLoginModal}>Login</p>
                             </div>
                         }
                     </button>
