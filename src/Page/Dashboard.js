@@ -7,13 +7,8 @@ function Dashboard() {
   const [selectedSection, setSelectedSection] = useState('syllabus'); // Default section
 
   // Handle section change from sidebar
-  const handleSectionChange = (section) => {
-    setSelectedSection(section);
-  };
-
   return (
     <div className="dashboard-container">
-      <DashboardSidebar onSectionChange={handleSectionChange} />
       <DashboardContent selectedSection={selectedSection} />
     </div>
   );

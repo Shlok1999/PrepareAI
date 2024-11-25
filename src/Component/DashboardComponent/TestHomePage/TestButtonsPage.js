@@ -62,15 +62,13 @@ const TestButtonsPage = () => {
             <h3>{subject}</h3>
             <div className="test-links">
               {Array.from({ length: 5 }).map((_, dayIndex) => {
-                const day = `Day ${dayIndex + 1}`;
+                const day = `Test ${dayIndex + 1}`;
                 const isCompleted = completedTests[subject]?.includes(dayIndex + 1);
-                const isDisabled = dayIndex > 0 && !completedTests[subject]?.includes(dayIndex);
 
                 return (
                   <div className="test-button-wrapper" key={dayIndex}>
                     <button
-                      className={`test-link-button ${isCompleted ? 'completed' : ''} ${isDisabled ? 'disabled' : ''}`}
-                      disabled={isDisabled}
+                      className={`test-link-button ${isCompleted ? 'completed' : ''}`}
                       onClick={() => handleTestClick(subject, dayIndex + 1)}
                     >
                       {day}

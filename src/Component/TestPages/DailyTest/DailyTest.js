@@ -47,29 +47,38 @@ function DailyTest() {
         setLoading(false);
         return;
       }
-
+  
       try {
-        // Fetch questions for all topics of the subject
+        // Fetch all questions matching the subject and topics
         const response = await databases.listDocuments(
           databaseId,
           questionCollectionId,
           [
             Query.equal('subject', subject),
             Query.equal('topic', topics), // Match any of the selected topics
-            Query.limit(5), // Limit to 50 questions
           ]
         );
-        setQuestions(response.documents);
+  
+        const allQuestions = response.documents;
+  
+        // Shuffle questions randomly (Fisher-Yates Shuffle)
+        for (let i = allQuestions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [allQuestions[i], allQuestions[j]] = [allQuestions[j], allQuestions[i]];
+        }
+  
+        // Select the first 10 questions (or adjust limit as needed)
+        const selectedQuestions = allQuestions.slice(0, 10);
+        setQuestions(selectedQuestions);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching questions:", error);
         setLoading(false);
       }
     };
-
+  
     if (studentID) fetchQuestions();
   }, [studentID, subject]);
-
   useEffect(() => {
     if (isSubmitted) return;
 
