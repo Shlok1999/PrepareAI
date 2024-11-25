@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const TestButtonsPage = () => {
   const [topicsData, setTopicsData] = useState({});
-  const [expandedSubject, setExpandedSubject] = useState(null); // Track which dropdown is open
+  const [expandedSubject, setExpandedSubject] = useState(null);
   const navigate = useNavigate();
 
   // Fetch topics from local storage
@@ -37,6 +37,7 @@ const TestButtonsPage = () => {
               onClick={() => toggleDropdown(subject)}
             >
               {subject}
+              <span className={`arrow ${expandedSubject === subject ? 'up' : 'down'}`} />
             </div>
             {expandedSubject === subject && (
               <div className="test-links">
