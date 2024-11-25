@@ -54,7 +54,7 @@ function DailyTest() {
           databaseId,
           questionCollectionId,
           [
-            Query.equal('subject', subject),
+            Query.equal('subject', subject), 
             Query.equal('topic', topics), // Match any of the selected topics
           ]
         );
