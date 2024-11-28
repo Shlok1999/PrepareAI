@@ -68,7 +68,7 @@ function DailyTest() {
         }
   
         // Select the first 10 questions (or adjust limit as needed)
-        const selectedQuestions = allQuestions.slice(0, 10);
+        const selectedQuestions = allQuestions.slice(0, 5);
         setQuestions(selectedQuestions);
         setLoading(false);
       } catch (error) {
