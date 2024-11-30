@@ -1,5 +1,4 @@
-/* Container styling */
-.test-content-container {
+/* .test-content-container {
   max-width: 1200px;
   margin: 2rem auto;
   padding: 1.5rem;
@@ -16,7 +15,6 @@
   color: #333;
 }
 
-/* Subjects and dropdown */
 .subjects-container {
   display: flex;
   flex-wrap: wrap;
@@ -45,9 +43,8 @@
   color: #555;
 }
 
-/* Dropdown */
 .css-1okebmr-indicatorSeparator {
-  display: none; /* Hide separator in the React-Select dropdown */
+  display: none;
 }
 
 .css-yk16xz-control {
@@ -58,16 +55,15 @@
 
 .css-1pahdxg-control {
   border-radius: 6px;
-  border-color: #673ab7 !important; /* Highlight border when dropdown is focused */
+  border-color: #673ab7 !important; 
   box-shadow: none !important;
 }
 
 .css-26l3qy-menu {
   border-radius: 6px;
-  z-index: 1000; /* Ensure dropdown is on top */
+  z-index: 1000; 
 }
 
-/* Submit button */
 .submit-button {
   background: #4caf50;
   color: white;
@@ -88,4 +84,4 @@
 
 .submit-button:hover:not(:disabled) {
   background: #45a049;
-}
+} */

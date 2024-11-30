@@ -1,137 +1,113 @@
-import React, { useState, useEffect } from 'react';
-import InfoForm from '../Component/InfoForm';
-import LoginComponent from '../Component/AuthComponent/LoginComponent';
-import { account } from '../appwrite/appwriteConfig';
-import '../Style/Homepage.css';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Image } from "react-bootstrap";
+import logo from "../Style/images/logo.png";
+import bg from "../Style/images/bg.png";
+import { googleLogout, useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Homepage() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // State for login modal
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // Track if user is logged in
-    const [showDropdown, setShowDropdown] = useState(false); // For showing profile dropdown
-    const [user,setUser] = useState(null);//Store User data after login
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
-    // Modal control for InfoForm
-    const openModal = () => {
-        setIsModalOpen(true);
-    };
+  const login = useGoogleLogin({
+    onSuccess: (codeResponse) => {
+      sessionStorage.setItem("user", JSON.stringify(codeResponse));
+      fetchUserProfile(codeResponse.access_token);
+    },
+    onError: (error) => console.log("Login Failed:", error),
+  });
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
-
-    // Modal control for login
-    const openLoginModal = () => {
-        setIsLoginModalOpen(true);
-    };
-
-    const closeLoginModal = () => {
-        setIsLoginModalOpen(false);
-    };
-
-    // Pseudo login function
-    const handleLogin =async () => {
-        try {
-            const userData = await account.get(); 
-            setUser(userData);
-            setIsLoggedIn(true);
-            closeLoginModal();
-        } catch (error) {
-            console.error('Error fetching user data:', error);
+  const fetchUserProfile = async (accessToken) => {
+    try {
+      const res = await axios.get(
+        `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${accessToken}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: "application/json",
+          },
         }
-    };
+      );
+      sessionStorage.setItem("profile", JSON.stringify(res.data));
+      navigate("/dashboard"); // Redirect to dashboard after successful login
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    useEffect(() => {
-        const getUserData = async () => {
-            try {
-                const userData = await account.get(); // Fetch user data from Appwrite session
-                setUser(userData);
-                setIsLoggedIn(true);
-            } catch (error) {
-                console.error('No session found:', error);
-            }
-        };
-
-        getUserData();
-    }, []);
-
-    console.log(isLoggedIn)
-
-    const handleLogout = async () => {
-        try {
-            await account.deleteSession('current'); // End user session
-            setIsLoggedIn(false); // Simulate logging out
-            setUser(null); // Clear user data
-            setShowDropdown(false); // Hide dropdown
-        } catch (error) {
-            console.error('Error logging out:', error);
-        }
-    };
-
-    // Toggle the dropdown for profile options
-    const toggleDropdown = () => {
-        setShowDropdown(!showDropdown);
-    };
-
-    // Pseudo logout function
-    
-
-    return (
-        <div className="main-container">
-            {/* Top Right Login/Profile Button */}
-            <div className="top-right-container">
-                {!isLoggedIn ? (
-                    <button className="login-button" onClick={openLoginModal}>
-                        Login
-                    </button>
-                ) : (
-                    <div className="user-profile">
-                        <img
-                            src="https://www.w3schools.com/howto/img_avatar.png"
-                            alt="user-logo"
-                            className="user-logo"
-                            onClick={toggleDropdown}
-                        />
-                        {showDropdown && (
-                            <div className="dropdown-menu">
-                                <ul>
-                                    <li><a href="/dashboard">Dashboard</a></li>
-                                    <li><button onClick={handleLogout}>Signout</button></li>
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            <div className="content-container">
-                <div className="text-container">
-                    <h1 className="heading">Welcome to PrepareAI</h1>
-                    <p className="subheading">
-                        Sharpen your mind with the toughest questions designed for your success.
-                    </p>
-                    <button className="get-started-button">
-                        {
-                            isLoggedIn?
-                            <div>
-                                <Link style={{textDecoration: 'none', color: 'white'}} to={'/dashboard'}>Go To Dashboard</Link>
-                            </div>
-                            :<div>
-                                <p onClick={openLoginModal}>Login</p>
-                            </div>
-                        }
-                    </button>
-                </div>
-                <div className="animation-container">
-                    {/* The animated gradient section */}
-                </div>
-            </div>
-
-            <InfoForm isOpen={isModalOpen} onClose={closeModal} /> {/* InfoForm modal rendering */}
-            {isLoginModalOpen && <LoginComponent onClose={closeLoginModal} handleLogin={handleLogin} />} {/* Login modal rendering */}
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      fetchUserProfile(JSON.parse(storedUser).access_token);
+    }
+  }, []);
+  return (
+    <div className="main">
+      <div className="content">
+        <div className="left">
+          <div className="logo">
+            <Image src={logo} alt="Prepare.Ai"></Image>
+          </div>
+          <div className="description" alt="Prepare.Ai - background">
+            Revolutionize Your Study Experience: AI-Powered Tools for Effective
+            Exam Preparation!
+          </div>
+          <div className="button-container">
+            <button onClick={login} className="login-with-google-btn">
+              Sign in with Google
+            </button>
+          </div>
         </div>
-    );
+        <div className="right">
+          <Image src={bg}></Image>
+        </div>
+      </div>
+      <div className="card-container">
+        <h1>What you get with Prepare.Ai?</h1>
+        <div className="card">
+          <div className="left">
+            <p className="title">Unlock Your Potential</p>
+            <span>
+              and discover personalized strategies tailored to your unique
+              learning style.
+            </span>
+          </div>
+          <div className="right">
+            <Image src={bg}></Image>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="left">
+            <p className="title">Transform Your Study Habits</p>
+            <span>
+              into effective routines that maximize retention and understanding.
+            </span>
+          </div>
+          <div className="right">
+            <Image src={bg}></Image>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="left">
+            <p className="title">AI-Powered Learning Paths</p>
+            <span>to improve your shortcomings</span>
+          </div>
+          <div className="right">
+            <Image src={bg}></Image>
+          </div>
+        </div>
+      </div>
+      <div className="footer-container">
+        <p>
+          Copyright ©{new Date().getFullYear()} Power.Ai | All rights reserved.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default Homepage;
