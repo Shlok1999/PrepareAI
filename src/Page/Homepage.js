@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Image } from "react-bootstrap";
 import logo from "../Style/images/logo.png";
 import bg from "../Style/images/bg.png";
-import { googleLogout, useGoogleLogin } from "@react-oauth/google";
+import {  useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
