@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Image } from "react-bootstrap";
 import {
   FaBook,
   FaClipboardList,
@@ -10,25 +9,17 @@ import {
   FaAlignJustify,
 } from "react-icons/fa";
 
-function DashboardSidebar({ selectedSection, onSectionChange }) {
-  const [userProfile, setUserProfile] = useState("");
-  const [isOpen, setIsOpen] = useState(true);
+function DashboardSidebar({ selectedSection, onSectionChange, isOpen, toggleSidebar }) {
+  const [userProfile, setUserProfile] = useState({});
 
   useEffect(() => {
-    const getUsername = async () => {
-      try {
-        const userProfile = JSON.parse(sessionStorage.getItem("profile"));
-        setUserProfile(userProfile);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
+    const profile = JSON.parse(sessionStorage.getItem("profile")) || {
+      name: "John Doe",
+      picture: "https://via.placeholder.com/150",
+      email: "johndoe@gmail.com",
     };
-    getUsername();
+    setUserProfile(profile);
   }, []);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
 
   const handleSectionClick = (section) => {
     onSectionChange(section);
@@ -37,53 +28,85 @@ function DashboardSidebar({ selectedSection, onSectionChange }) {
 
   return (
     <div
-      className={`dashboard-sidebar-container ${isOpen ? "open" : "collapsed"}`}
+      className={`fixed top-0 left-0 h-full bg-indigo-700 text-white shadow-lg transition-all duration-300 ${
+        isOpen ? "w-64" : "w-16"
+      }`}
     >
-      <div className="sidebar-content">
-        <ul>
-          <li className="userProfile">
-            <Image src={userProfile.picture} alt={userProfile.name}></Image>
-            <span>{userProfile.name}</span>
-          </li>
-          <li
-            className={selectedSection === "syllabus" ? "active" : ""}
-            onClick={() => handleSectionClick("syllabus")}
-          >
-            <FaBook /> <span>Syllabus</span>
-          </li>
-          <li
-            className={selectedSection === "test" ? "active" : ""}
-            onClick={() => handleSectionClick("test")}
-          >
-            <FaClipboardList /> <span>Go To Test</span>
-          </li>
-          <li
-            className={selectedSection === "profileSettings" ? "active" : ""}
-            onClick={() => handleSectionClick("profileSettings")}
-          >
-            <FaUserCog /> <span>Profile & Settings</span>
-          </li>
-          <li
-            className={selectedSection === "resources" ? "active" : ""}
-            onClick={() => handleSectionClick("resources")}
-          >
-            <FaTools /> <span>Study Resources</span>
-          </li>
-          <li
-            className={selectedSection === "progress" ? "active" : ""}
-            onClick={() => handleSectionClick("progress")}
-          >
-            <FaTrophy /> <span>Achievements & Progress</span>
-          </li>
-          <li className="sidebar-toggler">
-            {isOpen ? (
-              <FaAngleLeft onClick={toggleSidebar} />
-            ) : (
-              <FaAlignJustify onClick={toggleSidebar} />
-            )}
-          </li>
-        </ul>
+      <div className="flex items-center justify-between p-4 border-b border-indigo-600">
+        {isOpen ? (
+          <div className="flex items-center space-x-3">
+            <img
+              src={userProfile.picture}
+              alt={userProfile.name}
+              className="w-10 h-10 rounded-full"
+            />
+            <div>
+              <p className="text-sm font-semibold">{userProfile.name}</p>
+              <p className="text-xs text-indigo-300">{userProfile.email}</p>
+            </div>
+          </div>
+        ) : (
+          <img
+            src={userProfile.picture}
+            alt={userProfile.name}
+            className="w-10 h-10 rounded-full"
+          />
+        )}
+        <button
+          onClick={toggleSidebar}
+          className="text-indigo-300 hover:text-white focus:outline-none"
+        >
+          {isOpen ? <FaAngleLeft size={20} /> : <FaAlignJustify size={20} />}
+        </button>
       </div>
+
+      <ul className="mt-4 space-y-2">
+        <li
+          className={`flex items-center px-4 py-3 cursor-pointer hover:bg-indigo-600 ${
+            selectedSection === "syllabus" ? "bg-indigo-600" : ""
+          }`}
+          onClick={() => handleSectionClick("syllabus")}
+        >
+          <FaBook size={20} />
+          {isOpen && <span className="ml-3">Syllabus</span>}
+        </li>
+        <li
+          className={`flex items-center px-4 py-3 cursor-pointer hover:bg-indigo-600 ${
+            selectedSection === "test" ? "bg-indigo-600" : ""
+          }`}
+          onClick={() => handleSectionClick("test")}
+        >
+          <FaClipboardList size={20} />
+          {isOpen && <span className="ml-3">Go To Test</span>}
+        </li>
+        <li
+          className={`flex items-center px-4 py-3 cursor-pointer hover:bg-indigo-600 ${
+            selectedSection === "profileSettings" ? "bg-indigo-600" : ""
+          }`}
+          onClick={() => handleSectionClick("profileSettings")}
+        >
+          <FaUserCog size={20} />
+          {isOpen && <span className="ml-3">Profile & Settings</span>}
+        </li>
+        <li
+          className={`flex items-center px-4 py-3 cursor-pointer hover:bg-indigo-600 ${
+            selectedSection === "resources" ? "bg-indigo-600" : ""
+          }`}
+          onClick={() => handleSectionClick("resources")}
+        >
+          <FaTools size={20} />
+          {isOpen && <span className="ml-3">Study Resources</span>}
+        </li>
+        <li
+          className={`flex items-center px-4 py-3 cursor-pointer hover:bg-indigo-600 ${
+            selectedSection === "progress" ? "bg-indigo-600" : ""
+          }`}
+          onClick={() => handleSectionClick("progress")}
+        >
+          <FaTrophy size={20} />
+          {isOpen && <span className="ml-3">Achievements & Progress</span>}
+        </li>
+      </ul>
     </div>
   );
 }

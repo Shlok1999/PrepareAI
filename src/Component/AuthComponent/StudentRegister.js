@@ -1,167 +1,197 @@
 import React, { useState } from 'react';
 import { account, databases } from '../../appwrite/appwriteConfig';
-import '../../Style/Registration.css'; // Create a corresponding CSS file for styling
 
 function StudentRegister() {
-    // State for form fields
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [phone, setPhone] = useState('');
-    const [classLevel, setClassLevel] = useState('11'); // Default class is 11
-    const [exam, setExam] = useState('IIT-JEE'); // Default exam is IIT-JEE
-    const [examYear,setExamYear] = useState(2024);
-    const [parent_phone, setParentPhone] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // State to manage loading
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [classLevel, setClassLevel] = useState('11');
+  const [exam, setExam] = useState('IIT-JEE');
+  const [examYear, setExamYear] = useState(2024);
+  const [parentPhone, setParentPhone] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-    // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-    
-        try {
-            // Create a new user account in Appwrite
-            const userResponse = await account.create(
-                'unique()', // Unique ID for the user
-                email,
-                password,
-                name
-            );
-            setSuccessMessage('Registration successful! User created.');
-    
-            // Save additional user data in Appwrite's database
-            try {
-                const userInDb = await databases.createDocument(
-                    process.env.REACT_APP_DATABASE_ID,
-                    process.env.REACT_APP_STUDENT_COLL_ID,
-                    'unique()', // Unique document ID
-                    {
-                        name: name,
-                        email: email,
-                        password: password,
-                        phone: phone,
-                        classLevel: classLevel,
-                        exam: exam,
-                        exam_year: examYear,
-                        parent_phone: parent_phone,
+    try {
+      const userResponse = await account.create('unique()', email, password, name);
+      setSuccessMessage('Registration successful!');
 
-                    }
-                );
-    
-                if (userInDb) {
-                    console.log("Student added to DB:", userInDb);
-                    setSuccessMessage('Student data saved successfully!');
-                }
-            } catch (dbError) {
-                setErrorMessage('Failed to save student in the database.');
-                console.error('Database error:', dbError);
-            }
-        } catch (error) {
-            setErrorMessage('Registration failed. Please try again.');
-            console.error('Registration error:', error);
-        } finally {
-            setIsLoading(false);
-            // Optionally reload page or redirect user after successful registration
+      try {
+        const userInDb = await databases.createDocument(
+          process.env.REACT_APP_DATABASE_ID,
+          process.env.REACT_APP_STUDENT_COLL_ID,
+          'unique()',
+          {
+            name,
+            email,
+            phone,
+            classLevel,
+            exam,
+            exam_year: examYear,
+            parent_phone: parentPhone,
+          }
+        );
+
+        if (userInDb) {
+          setSuccessMessage('Student registered successfully!');
         }
-    };
+      } catch (dbError) {
+        setErrorMessage('Failed to save student details in the database.');
+        console.error('Database error:', dbError);
+      }
+    } catch (error) {
+      setErrorMessage('Registration failed. Please try again.');
+      console.error('Registration error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return (
-        <div className="register-container">
-            {isLoading && (
-                <div className="loader-overlay">
-                    <div className="loader"></div>
-                </div>
-            )}
-            <h2>Student Registration</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="input-group">
-                    <label>Name</label>
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="input-group">
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="input-group">
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="input-group">
-                    <label>Phone Number</label>
-                    <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="input-group">
-                    <label>Class</label>
-                    <select
-                        value={classLevel}
-                        onChange={(e) => setClassLevel(e.target.value)}
-                    >
-                        <option value="11">11th</option>
-                        <option value="12">12th</option>
-                        <option value="repeater">Repeater</option>
-                    </select>
-                </div>
-                <div className="input-group">
-                    <label>Select Exam</label>
-                    <select
-                        value={exam}
-                        onChange={(e) => setExam(e.target.value)}
-                    >
-                        <option value="IIT-JEE">IIT-JEE</option>
-                        <option value="NEET">NEET</option>
-                    </select>
-                </div>
-                <div className="input-group">
-                    <label>Exam Year</label>
-                    <select
-                        value={exam}
-                        onChange={(e) => setExamYear(e.target.value)}
-                    >
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                    </select>
-                </div>
-                <div className="input-group">
-                    <label>Parent's Phone (Optional)</label>
-                    <input
-                        type="tel"
-                        value={parent_phone}
-                        onChange={(e) => setParentPhone(e.target.value)}
-                    />
-                </div>
-               
-                <button type="submit" className="submit-button">
-                    Register
-                </button>
-                {errorMessage && <p className="error-message">{errorMessage}</p>}
-                {successMessage && <p className="success-message">{successMessage}</p>}
-            </form>
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="loader"></div>
         </div>
-    );
+      )}
+
+      <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-8 mt-36 mb-10">
+        <h2 className="text-3xl font-bold text-center text-gray-800">Student Registration</h2>
+        <p className="text-center text-gray-600 mb-6">
+          Register now and start your journey to success!
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Create a password"
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Enter your phone number"
+            />
+          </div>
+
+          {/* Class */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Class</label>
+            <select
+              value={classLevel}
+              onChange={(e) => setClassLevel(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="11">11th</option>
+              <option value="12">12th</option>
+              <option value="repeater">Repeater</option>
+            </select>
+          </div>
+
+          {/* Exam */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Select Exam</label>
+            <select
+              value={exam}
+              onChange={(e) => setExam(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="IIT-JEE">IIT-JEE</option>
+              <option value="NEET">NEET</option>
+            </select>
+          </div>
+
+          {/* Exam Year */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Exam Year</label>
+            <select
+              value={examYear}
+              onChange={(e) => setExamYear(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
+
+          {/* Parent's Phone */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Parent's Phone (Optional)</label>
+            <input
+              type="tel"
+              value={parentPhone}
+              onChange={(e) => setParentPhone(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Enter parent's phone number"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            Register
+          </button>
+
+          {/* Error and Success Messages */}
+          {errorMessage && (
+            <p className="text-red-500 text-center text-sm mt-2">{errorMessage}</p>
+          )}
+          {successMessage && (
+            <p className="text-green-500 text-center text-sm mt-2">{successMessage}</p>
+          )}
+        </form>
+      </div>
+    </div>
+  );
 }
 
 export default StudentRegister;

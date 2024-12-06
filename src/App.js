@@ -10,11 +10,13 @@ import BiweeklyTest from './Component/TestPages/BiweeklyTest/BiweeklyTest';
 import DailyTest from './Component/TestPages/DailyTest/DailyTest';
 import TestHistoryMain from './Component/TestPages/TestHistory/TestHistoryMain';
 import TestButtonsPage from './Component/DashboardComponent/TestHomePage/TestButtonsPage';
-
+import Navbar from './Component/NavigationComponents/Navbar';
+import { Footer } from './Component/NavigationComponents/Footer';
 
 function App() {
   return (
       <Router>
+        {/* <Navbar/> */}
         <Routes>
           <Route exact path='/' element={<Homepage/>}/>
           <Route exact path='/test' element={<Test/>}/>
@@ -28,6 +30,7 @@ function App() {
           <Route path='/test/dpp/:subject/:topic' element={<DailyTest/>}/>
           <Route path='/test-history' element={<TestHistoryMain/>}/>
         </Routes>
+        {/* <Footer/> */}
       </Router>
   );
 }

@@ -1,3 +1,5 @@
+
+
 :root {
   --color1: #0B192C;
   --color2: #10375C;
@@ -1706,4 +1708,8 @@ input[type="radio"] {
 
 .submit-button:hover:not(:disabled) {
   background: #45a049;
+}
+
+.test-history-list .test-item{
+  text-align: left;
 }
