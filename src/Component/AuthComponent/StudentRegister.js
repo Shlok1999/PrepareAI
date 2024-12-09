@@ -61,7 +61,7 @@ function StudentRegister() {
         </div>
       )}
 
-      <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-8 mt-36 mb-10">
+      <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-8 mt-0 mb-10">
         <h2 className="text-3xl font-bold text-center text-gray-800">Student Registration</h2>
         <p className="text-center text-gray-600 mb-6">
           Register now and start your journey to success!

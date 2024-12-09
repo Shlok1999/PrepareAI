@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   BookOpen,
   LayoutDashboard,
@@ -9,12 +9,14 @@ import {
   BarChart,
   GraduationCap,
   X,
-  UserCircle
+  UserCircle,
+  Power
 } from "lucide-react";
+import { account } from "../../appwrite/appwriteConfig"; // Import Appwrite account configuration
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
-  { icon: UserCircle, label: 'Profile', to: '/dashboard/profile' },
+  { icon: UserCircle, label: "Profile", to: "/dashboard/profile" },
   { icon: BookCheck, label: "My Tests", to: "/dashboard/tests" },
   { icon: BarChart, label: "Performance", to: "/dashboard/performance" },
   { icon: Trophy, label: "Achievements", to: "/dashboard/achievements" },
@@ -24,9 +26,10 @@ const navItems = [
 
 export default function DashboardSidebar({ isOpen, onClose }) {
   const [userProfile, setUserProfile] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulating a fetch for the logged-in user's Google profile
+    // Fetch the logged-in user's profile
     const profile = JSON.parse(sessionStorage.getItem("profile")) || {
       name: "John Doe",
       email: "johndoe@gmail.com",
@@ -34,6 +37,17 @@ export default function DashboardSidebar({ isOpen, onClose }) {
     };
     setUserProfile(profile);
   }, []);
+
+  // Handle Logout
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession("current"); // Delete the current Appwrite session
+      sessionStorage.clear(); // Clear local session storage
+      navigate("/"); // Redirect to login page
+    } catch (err) {
+      console.error("Error during logout:", err);
+    }
+  };
 
   const DashboardSidebarClasses = `
     fixed top-0 left-0 h-screen w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out z-20
@@ -65,7 +79,7 @@ export default function DashboardSidebar({ isOpen, onClose }) {
             </div>
           </div>
 
-          {/* DashboardSidebar Navigation */}
+          {/* Sidebar Navigation */}
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <BookOpen className="h-8 w-8 text-indigo-600" />
@@ -96,10 +110,18 @@ export default function DashboardSidebar({ isOpen, onClose }) {
                 <span className="font-medium">{item.label}</span>
               </NavLink>
             ))}
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center px-4 py-3 rounded-lg transition-colors w-full text-left text-gray-600 hover:bg-gray-50"
+            >
+              <Power className="h-5 w-5 mr-3 text-red-500" />
+              <span className="font-medium text-red-500">Logout</span>
+            </button>
           </nav>
         </div>
       </aside>
     </>
   );
 }
-
