@@ -15,34 +15,50 @@ export function TestsPage() {
   useEffect(() => {
     const fetchTests = async () => {
       try {
-        const response = await databases.listDocuments(databaseId, collectionId);
+        // Fetch all questions (limit set to max allowed)
+        let allQuestions = [];
+        let response = await databases.listDocuments(databaseId, collectionId, [
+          Query.limit(500), // Adjust if you have more than 500 questions
+        ]);
+
+        allQuestions = response.documents;
+
+        // Check for pagination and fetch remaining questions
+        while (response.total > allQuestions.length) {
+          response = await databases.listDocuments(databaseId, collectionId, [
+            Query.offset(allQuestions.length),
+            Query.limit(100),
+          ]);
+          allQuestions = [...allQuestions, ...response.documents];
+        }
 
         // Group questions by subject
-        const groupedTests = response.documents.reduce((acc, question) => {
+        const groupedTests = allQuestions.reduce((acc, question) => {
           if (!acc[question.subject]) {
             acc[question.subject] = {
               name: `${question.subject.charAt(0).toUpperCase()}${question.subject.slice(
                 1
               )} Test`,
               duration: "2 hours", // Placeholder duration
-              questions: 0,
+              questions: [],
               topics: new Set(),
               subject: question.subject,
             };
           }
 
-          acc[question.subject].questions += 1;
+          acc[question.subject].questions.push(question);
           acc[question.subject].topics.add(question.topic);
           return acc;
         }, {});
 
-        // Convert grouped tests into an array
-        setTests(
-          Object.values(groupedTests).map((test) => ({
-            ...test,
-            topics: Array.from(test.topics),
-          }))
-        );
+        // Shuffle questions and format grouped tests
+        const formattedTests = Object.values(groupedTests).map((test) => ({
+          ...test,
+          questions: shuffleArray(test.questions),
+          topics: Array.from(test.topics),
+        }));
+
+        setTests(formattedTests);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching tests:", error);
@@ -53,8 +69,23 @@ export function TestsPage() {
     fetchTests();
   }, [databaseId, collectionId]);
 
-  const handleStartTest = (subject) => {
-    navigate(`/quiz/${subject}`);
+  const handleStartOrContinueTest = (test) => {
+    const savedState = localStorage.getItem(`testState_${test.subject}`);
+    if (savedState) {
+      navigate(`/quiz/${test.subject}`);
+    } else {
+      navigate(`/quiz/${test.subject}`);
+    }
+  };
+
+  // Function to shuffle an array
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   };
 
   if (isLoading) {
@@ -70,7 +101,9 @@ export function TestsPage() {
           <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{test.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {test.subject}
+                </h3>
                 <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
                   <span className="flex items-center">
                     <Clock className="h-4 w-4 mr-1" />
@@ -78,7 +111,7 @@ export function TestsPage() {
                   </span>
                   <span className="flex items-center">
                     <FileText className="h-4 w-4 mr-1" />
-                    {test.questions} questions
+                    {test.questions.length} questions
                   </span>
                 </div>
                 <div className="mt-2">
@@ -94,10 +127,12 @@ export function TestsPage() {
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => handleStartTest(test.subject)}
+                  onClick={() => handleStartOrContinueTest(test)}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
-                  Start Test
+                  {localStorage.getItem(`testState_${test.subject}`)
+                    ? "Continue Test"
+                    : "Start Test"}
                 </button>
               </div>
             </div>

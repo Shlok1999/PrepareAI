@@ -10,7 +10,7 @@ import {
   GraduationCap,
   X,
   UserCircle,
-  Power
+  Power,
 } from "lucide-react";
 import { account } from "../../appwrite/appwriteConfig"; // Import Appwrite account configuration
 
@@ -29,14 +29,21 @@ export default function DashboardSidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch the logged-in user's profile
-    const profile = JSON.parse(sessionStorage.getItem("profile")) || {
-      name: "John Doe",
-      email: "johndoe@gmail.com",
-      picture: "https://via.placeholder.com/150", // Placeholder profile image
+    const fetchUserProfile = async () => {
+      try {
+        const user = await account.get(); // Fetch user session data
+        setUserProfile({
+          name: user.name,
+          email: user.email,
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        navigate("/"); // Redirect to homepage if no session
+      }
     };
-    setUserProfile(profile);
-  }, []);
+
+    fetchUserProfile();
+  }, [navigate]);
 
   // Handle Logout
   const handleLogout = async () => {
@@ -66,24 +73,37 @@ export default function DashboardSidebar({ isOpen, onClose }) {
 
       <aside className={DashboardSidebarClasses}>
         <div className="p-6">
-          {/* Google User Profile */}
-          <div className="flex items-center border-b pb-4 mb-4">
-            <img
-              src={userProfile?.picture}
-              alt={userProfile?.name}
-              className="w-12 h-12 rounded-full"
-            />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">{userProfile?.name}</p>
-              <p className="text-xs text-gray-500">{userProfile?.email}</p>
+          {/* User Profile */}
+          {userProfile ? (
+            <div className="flex items-center border-b pb-4 mb-4">
+              <div className="w-12 h-12 bg-indigo-500 text-white flex items-center justify-center rounded-full text-lg font-bold uppercase">
+                {userProfile.name.charAt(0)} {/* First letter of user's name */}
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-900">
+                  {userProfile.name}
+                </p>
+                <p className="text-xs text-gray-500">{userProfile.email}</p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center border-b pb-4 mb-4">
+              <div className="w-12 h-12 bg-gray-200 text-gray-400 flex items-center justify-center rounded-full text-lg font-bold">
+                ?
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-900">Loading...</p>
+              </div>
+            </div>
+          )}
 
           {/* Sidebar Navigation */}
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <BookOpen className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">PrepareAI</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">
+                PrepareAI
+              </span>
             </div>
             <button
               onClick={onClose}

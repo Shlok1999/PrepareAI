@@ -29,15 +29,15 @@ export function Footer() {
             <ul className="space-y-2">
               <li className="flex items-center">
                 <Mail className="h-4 w-4 mr-2" />
-                <span>support@prepareai.com</span>
+                <span>09shlok1999ae1@gmail.com</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-4 w-4 mr-2" />
-                <span>+91 1234567890</span>
+                <span>+91 7005658779</span>
               </li>
               <li className="flex items-center">
                 <MapPin className="h-4 w-4 mr-2" />
-                <span>Bangalore, India</span>
+                <span>Navi Mumbai, India</span>
               </li>
             </ul>
           </div>
