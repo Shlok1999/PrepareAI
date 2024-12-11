@@ -30,14 +30,15 @@ export default function Navbar() {
       try {
         const user = await account.get(); // Check if the user session exists
         setUserProfile(user); // Store user profile in state
+        navigate("/dashboard"); // Navigate to dashboard if user is logged in
       } catch (error) {
         console.error("No active session:", error);
         setUserProfile(null); // Reset the profile if no session exists
       }
     };
-
+  
     checkUserSession();
-  }, []);
+  }, [navigate]); // Add navigate as a dependency
 
   return (
     <>
