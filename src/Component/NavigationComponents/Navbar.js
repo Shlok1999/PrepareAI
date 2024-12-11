@@ -68,6 +68,7 @@ export default function Navbar() {
                                 >
                                     Dashboard
                                 </button>
+                                
                                 <Power onClick={handleLogout} className="h-5 w-5 mr-3 text-red-500" />
 
                                 </>

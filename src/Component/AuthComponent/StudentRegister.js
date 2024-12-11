@@ -30,6 +30,7 @@ function StudentRegister() {
           {
             name,
             email,
+            password,
             phone,
             classLevel,
             exam,

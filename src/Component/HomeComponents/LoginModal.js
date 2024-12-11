@@ -17,6 +17,7 @@ export function LoginModal({ isOpen, onClose }) {
       // Attempt to log in the user via Appwrite
       await account.createEmailPasswordSession(email, password);
       const profile = await account.get(); // Fetch user profile
+      console.log(profile)
       sessionStorage.setItem("profile", JSON.stringify(profile));
       onClose(); // Close the modal on successful login
       navigate("/dashboard"); // Redirect to dashboard
