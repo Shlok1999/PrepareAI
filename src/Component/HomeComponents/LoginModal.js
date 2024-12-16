@@ -29,7 +29,7 @@ export function LoginModal({ isOpen, onClose }) {
       sessionStorage.setItem("profile", JSON.stringify(profile));
 
       onClose(); // Close modal after successful login
-      navigate("/dashboard"); // Redirect to dashboard
+      window.location.href = "/dashboard" // Redirect to dashboard
     } catch (error) {
       setErrorMessage("Invalid email or password. Please try again.");
       console.error("Login Error:", error);

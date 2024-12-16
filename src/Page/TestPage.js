@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Clock, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { databases } from "../appwrite/appwriteConfig";
+import { account,databases } from "../appwrite/appwriteConfig";
 import { Query } from "appwrite";
 
 export function TestsPage() {
@@ -11,6 +11,13 @@ export function TestsPage() {
 
   const databaseId = process.env.REACT_APP_DATABASE_ID;
   const collectionId = process.env.REACT_APP_QUESTION_ID;
+  const mock_test_collId = process.env.REACT_APP_MOCK_TEST_ID;
+
+  
+
+  // useEffect(()=>{
+  //   updateTestStatus();
+  // },[])
 
   useEffect(() => {
     const fetchTests = async () => {
@@ -65,10 +72,52 @@ export function TestsPage() {
     fetchTests();
   }, [databaseId, collectionId]);
 
-  const handleStartOrContinueTest = (test) => {
-    const savedState = localStorage.getItem(`testState_${test.subject}`);
-    navigate(`/quiz/${test.subject}`);
+  const handleStartOrContinueTest = async (test) => {
+    try {
+      // Fetch the current student details
+      const student = await account.get();
+      if (!student || !student.$id) {
+        console.error("Student not found");
+        return;
+      }
+  
+      // Fetch existing mock test document for the student and subject
+      const existingMockTest = await databases.listDocuments(databaseId, mock_test_collId, [
+        Query.equal("student_id", student.$id),
+        Query.equal("subject", test.subject),
+      ]);
+  
+      if (existingMockTest.documents.length > 0) {
+        // If the document exists, update the status to "in_progress"
+        const mockTestId = existingMockTest.documents[0].$id;
+        await databases.updateDocument(databaseId, mock_test_collId, mockTestId, {
+          status: "started",
+        });
+        console.log("Mock test status updated to 'in_progress'.");
+      } else {
+        // If no document exists, create a new one with all required fields
+        await databases.createDocument(databaseId, mock_test_collId, "unique()", {
+          student_id: student.$id,
+          student_name: student.name,
+          status: "started", // Set initial status
+          marks: 0, // Initial marks set to 0
+          subject: test.subject, // Set subject
+          topics: test.topics, // Set topics
+          attempted: 0, // Initial attempted questions count
+          correct: 0, // Initial correct answers count
+          wrong: 0, // Initial wrong answers count
+        });
+        console.log("New mock test document created.");
+      }
+  
+      // Navigate to the quiz page
+      navigate(`/quiz/${test.subject}`);
+    } catch (error) {
+      console.error("Error handling test start or continuation:", error);
+    }
   };
+  
+  
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
