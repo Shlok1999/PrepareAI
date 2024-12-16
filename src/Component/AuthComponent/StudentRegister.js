@@ -64,6 +64,7 @@ export default function StudentRegister() {
       console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
+      window.location.href="/"
     }
   };
 
