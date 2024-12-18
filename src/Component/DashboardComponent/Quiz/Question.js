@@ -24,6 +24,7 @@ export function Question({
         >
           <Flag className="h-5 w-5" />
         </button>
+        <span style={{fontSize: '12px', color: 'grey'}}>{question.topic}</span>
       </div>
 
       <div className="space-y-3">

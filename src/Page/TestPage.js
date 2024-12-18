@@ -1,23 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Clock, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { account,databases } from "../appwrite/appwriteConfig";
+import { account, databases } from "../appwrite/appwriteConfig";
 import { Query } from "appwrite";
 
 export function TestsPage() {
   const navigate = useNavigate();
-  const [tests, setTests] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [tests, setTests] = useState([]); // Holds all tests grouped by subject
+  const [isLoading, setIsLoading] = useState(true); // Loader flag
 
   const databaseId = process.env.REACT_APP_DATABASE_ID;
   const collectionId = process.env.REACT_APP_QUESTION_ID;
   const mock_test_collId = process.env.REACT_APP_MOCK_TEST_ID;
-
-  
-
-  // useEffect(()=>{
-  //   updateTestStatus();
-  // },[])
 
   useEffect(() => {
     const fetchTests = async () => {
@@ -29,6 +23,7 @@ export function TestsPage() {
 
         allQuestions = response.documents;
 
+        // Check for pagination and fetch additional questions
         while (response.total > allQuestions.length) {
           response = await databases.listDocuments(databaseId, collectionId, [
             Query.offset(allQuestions.length),
@@ -37,12 +32,11 @@ export function TestsPage() {
           allQuestions = [...allQuestions, ...response.documents];
         }
 
+        // Group questions by subject
         const groupedTests = allQuestions.reduce((acc, question) => {
           if (!acc[question.subject]) {
             acc[question.subject] = {
-              name: `${question.subject.charAt(0).toUpperCase()}${question.subject.slice(
-                1
-              )} Test`,
+              name: `${question.subject.charAt(0).toUpperCase()}${question.subject.slice(1)} Test`,
               duration: "2 hours",
               questions: [],
               topics: new Set(),
@@ -55,9 +49,9 @@ export function TestsPage() {
           return acc;
         }, {});
 
+        // Format grouped tests
         const formattedTests = Object.values(groupedTests).map((test) => ({
           ...test,
-          questions: shuffleArray(test.questions),
           topics: Array.from(test.topics),
         }));
 
@@ -74,7 +68,6 @@ export function TestsPage() {
 
   const handleStartOrContinueTest = async (test) => {
     try {
-      // Fetch the current student details
       const student = await account.get();
       if (!student || !student.$id) {
         console.error("Student not found");
@@ -82,30 +75,51 @@ export function TestsPage() {
       }
   
       // Fetch existing mock test document for the student and subject
-      const existingMockTest = await databases.listDocuments(databaseId, mock_test_collId, [
+      const existingMockTests = await databases.listDocuments(databaseId, mock_test_collId, [
         Query.equal("student_id", student.$id),
         Query.equal("subject", test.subject),
       ]);
   
-      if (existingMockTest.documents.length > 0) {
-        // If the document exists, update the status to "in_progress"
-        const mockTestId = existingMockTest.documents[0].$id;
-        await databases.updateDocument(databaseId, mock_test_collId, mockTestId, {
-          status: "started",
-        });
-        console.log("Mock test status updated to 'in_progress'.");
+      if (existingMockTests.documents.length > 0) {
+        // Sort tests by creation date to get the latest one
+        const sortedTests = existingMockTests.documents.sort(
+          (a, b) => new Date(b.$createdAt) - new Date(a.$createdAt)
+        );
+        const latestMockTest = sortedTests[0];
+  
+        if (latestMockTest.status === "completed") {
+          // If the latest test is completed, create a new mock test
+          await databases.createDocument(databaseId, mock_test_collId, "unique()", {
+            student_id: student.$id,
+            student_name: student.name,
+            subject: test.subject,
+            topics: test.topics,
+            marks: 0,
+            attempted: 0,
+            correct: 0,
+            wrong: 0,
+            status: "started",
+          });
+          console.log("New mock test document created.");
+        } else {
+          // If the latest test is not completed, update its status to "in_progress"
+          await databases.updateDocument(databaseId, mock_test_collId, latestMockTest.$id, {
+            status: "started",
+          });
+          console.log("Mock test status updated to 'in_progress'.");
+        }
       } else {
-        // If no document exists, create a new one with all required fields
+        // No existing test found, create a new one
         await databases.createDocument(databaseId, mock_test_collId, "unique()", {
           student_id: student.$id,
           student_name: student.name,
-          status: "started", // Set initial status
-          marks: 0, // Initial marks set to 0
-          subject: test.subject, // Set subject
-          topics: test.topics, // Set topics
-          attempted: 0, // Initial attempted questions count
-          correct: 0, // Initial correct answers count
-          wrong: 0, // Initial wrong answers count
+          subject: test.subject,
+          topics: test.topics,
+          marks: 0,
+          attempted: 0,
+          correct: 0,
+          wrong: 0,
+          status: "started",
         });
         console.log("New mock test document created.");
       }
@@ -119,15 +133,6 @@ export function TestsPage() {
   
   
 
-  const shuffleArray = (array) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -140,9 +145,7 @@ export function TestsPage() {
         {tests.map((test, index) => (
           <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
             <div className="flex flex-col">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {test.subject}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900">{test.subject}</h3>
               <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
                 <span className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
@@ -169,9 +172,12 @@ export function TestsPage() {
                   onClick={() => handleStartOrContinueTest(test)}
                   className="w-full sm:w-40 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
-                  {localStorage.getItem(`testState_${test.subject}`)
-                    ? "Continue Test"
-                    : "Start Test"}
+                  {(() => {
+                    const student = account.get();
+                    const mockTest = tests.find((t) => t.subject === test.subject);
+                    if (mockTest?.status === "completed") return "Retake Test";
+                    return localStorage.getItem(`testState_${test.subject}`) ? "Continue Test" : "Start Test";
+                  })()}
                 </button>
               </div>
             </div>

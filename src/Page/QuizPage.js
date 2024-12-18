@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { databases } from "../appwrite/appwriteConfig";
+import { databases, account } from "../appwrite/appwriteConfig";
 import { QuizLayout } from "../Component/DashboardComponent/Quiz/QuizLayout";
 import { Question } from "../Component/DashboardComponent/Quiz/Question";
 import { Navigation } from "../Component/DashboardComponent/Quiz/Navigation";
 import { QuestionGrid } from "../Component/DashboardComponent/Quiz/QuestionGrid";
 import { StartTestModal } from "../Component/DashboardComponent/Quiz/StartTestModal";
+import { ResultsModal } from "../Component/DashboardComponent/Quiz/ResultsModal";
 import { Query } from "appwrite";
 
 export default function QuizPage() {
   const { subject } = useParams();
   const navigate = useNavigate();
+
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
@@ -19,8 +21,17 @@ export default function QuizPage() {
   const [isTestModalOpen, setIsTestModalOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
+  const [quizResults, setQuizResults] = useState({
+    attempted: 0,
+    correct: 0,
+    wrong: 0,
+    totalMarks: 0,
+  });
+
   const databaseId = process.env.REACT_APP_DATABASE_ID;
   const collectionId = process.env.REACT_APP_QUESTION_ID;
+  const mock_test_collId = process.env.REACT_APP_MOCK_TEST_ID;
 
   useEffect(() => {
     const loadTestState = () => {
@@ -69,7 +80,6 @@ export default function QuizPage() {
     }
   }, [subject, databaseId, collectionId]);
 
-  // Utility to shuffle an array
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -124,21 +134,75 @@ export default function QuizPage() {
     saveTestState();
   };
 
-  const handleSubmit = () => {
-    console.log("Submitted Answers:", answers);
+  const handleSubmit = async () => {
+    let attempted = 0,
+      correct = 0,
+      wrong = 0;
+  
+    // Iterate through the answers and calculate results
+    answers.forEach((ans, index) => {
+      if (ans !== null) {
+        attempted++;
+        if (questions[index].options[ans] === questions[index].correct_answer) {
+          correct++;
+        } else {
+          wrong++;
+        }
+      }
+    });
+  
+    const totalMarks = correct * 4 - wrong * 1;
+  
+    const results = { attempted, correct, wrong, totalMarks };
+    console.log("Quiz Results:", results);
+  
+    try {
+      // Fetch the student session
+      const student = await account.get();
+      const studentId = student.$id;
+  
+      // Fetch the latest mock test document for this student and subject
+      const existingMockTest = await databases.listDocuments(databaseId, mock_test_collId, [
+        Query.equal("student_id", studentId),
+        Query.equal("subject", subject),
+      ]);
+  
+      if (existingMockTest.documents.length > 0) {
+        // Sort documents by creation date to get the latest one
+        const sortedTests = existingMockTest.documents.sort(
+          (a, b) => new Date(b.$createdAt) - new Date(a.$createdAt)
+        );
+        const latestMockTest = sortedTests[0];
+  
+        // Update the latest mock test document
+        await databases.updateDocument(databaseId, mock_test_collId, latestMockTest.$id, {
+          marks: totalMarks,
+          attempted: attempted,
+          correct: correct,
+          wrong: wrong,
+          status: "completed",
+        });
+  
+        console.log("Mock test record updated successfully.");
+      } else {
+        console.warn("No mock test document found for this student and subject.");
+      }
+    } catch (error) {
+      console.error("Error updating mock test collection:", error);
+    }
+  
+    setQuizResults(results);
+    setIsResultsModalOpen(true);
+  
+    // Clear local storage
     localStorage.removeItem(`testState_${subject}`);
     localStorage.removeItem(`questions_${subject}`);
-    navigate("/dashboard/tests");
   };
+  
 
   const handleTimeUp = () => {
     handleSubmit();
   };
-
-  // Check if the test has expired
-  if (endTime && new Date() > new Date(endTime)) {
-    return <div>The test time has expired. Please contact your instructor.</div>;
-  }
 
   if (isLoading) return <div>Loading questions...</div>;
   if (questions.length === 0) return <div>No questions found for {subject}</div>;
@@ -148,7 +212,7 @@ export default function QuizPage() {
       {isTestModalOpen && (
         <StartTestModal
           subject={subject}
-          duration={120} // Assuming 120 minutes for the test
+          duration={120}
           questionCount={questions.length}
           onStart={() => setIsTestModalOpen(false)}
           onClose={() => navigate("/dashboard/tests")}
@@ -164,13 +228,6 @@ export default function QuizPage() {
             onAnswerSelect={handleAnswerSelect}
             onFlag={handleFlagToggle}
           />
-          <QuestionGrid
-            totalQuestions={questions.length}
-            currentQuestion={currentQuestion}
-            answers={answers}
-            flaggedQuestions={flaggedQuestions}
-            onQuestionSelect={handleQuestionSelect}
-          />
           <Navigation
             currentQuestion={currentQuestion}
             totalQuestions={questions.length}
@@ -178,8 +235,22 @@ export default function QuizPage() {
             onNext={handleNext}
             onSubmit={handleSubmit}
           />
+          <QuestionGrid
+            totalQuestions={questions.length}
+            currentQuestion={currentQuestion}
+            answers={answers}
+            flaggedQuestions={flaggedQuestions}
+            onQuestionSelect={handleQuestionSelect}
+          />
+          
         </QuizLayout>
       )}
+
+      <ResultsModal
+        isOpen={isResultsModalOpen}
+        onClose={() => navigate("/dashboard/tests")}
+        results={quizResults}
+      />
     </>
   );
 }
