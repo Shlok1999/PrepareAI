@@ -36,9 +36,9 @@ export function DashboardHome() {
 
   const stats = [
     { icon: BookOpen, label: "Tests Completed", value: recentTests.length },
-    { icon: Clock, label: "Study Hours", value: "156" }, // Placeholder
-    { icon: Users, label: "Global Rank", value: "#234" }, // Placeholder
-    { icon: Trophy, label: "Achievements", value: "12" }, // Placeholder
+    { icon: Clock, label: "Study Hours", value: "NA" }, // Placeholder
+    { icon: Users, label: "Global Rank", value: "NA" }, // Placeholder
+    { icon: Trophy, label: "Achievements", value: "NA" }, // Placeholder
   ];
 
   const handleSeeMore = () => {
