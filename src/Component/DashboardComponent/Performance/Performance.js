@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { account, databases } from "../appwrite/appwriteConfig";
+import { account, databases } from "../../../appwrite/appwriteConfig";
 import { Query } from "appwrite";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 
-export default function PerformancePage() {
+export default function Performance() {
   const [overallStats, setOverallStats] = useState({
     totalTests: 0,
     averageMarks: 0,
