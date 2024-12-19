@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { databases, account } from "../../appwrite/appwriteConfig";
 import { Query } from "appwrite";
 import { BookOpen, Users, Clock, Trophy } from "lucide-react";
+import { DashboardLoader } from "./DashboardLoader";
 
 export function DashboardHome() {
   const [recentTests, setRecentTests] = useState([]); // To store the recent tests
@@ -44,6 +45,9 @@ export function DashboardHome() {
   const handleSeeMore = () => {
     setVisibleTests((prev) => prev + 3); // Show 3 more tests
   };
+
+  if(isLoading)
+    return <DashboardLoader/>
 
   return (
     <div>
