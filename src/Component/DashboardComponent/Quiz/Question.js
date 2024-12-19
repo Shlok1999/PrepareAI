@@ -11,31 +11,29 @@ export function Question({
   return (
     <div className="mb-8">
       <div className="flex items-start justify-between mb-4">
-        <h2 className="text-lg font-medium text-gray-900">
-          {question.id}. {question.question_text}
+        <h2 className="text-lg font-medium text-gray-900 text-left">
+          {question.question_text}
         </h2>
         <button
           onClick={onFlag}
-          className={`p-2 rounded-lg transition-colors ${
-            isFlagged
+          className={`p-2 rounded-lg transition-colors ${isFlagged
               ? "bg-yellow-50 text-yellow-600"
               : "text-gray-400 hover:text-gray-600"
-          }`}
+            }`}
         >
           <Flag className="h-5 w-5" />
         </button>
-        <span style={{fontSize: '12px', color: 'grey'}}>{question.topic}</span>
+        {/* <span style={{fontSize: '12px', color: 'grey'}}>{question.topic}</span> */}
       </div>
 
       <div className="space-y-3">
         {question.options.map((option, index) => (
           <label
             key={index}
-            className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-              selectedAnswer === index
+            className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${selectedAnswer === index
                 ? "border-indigo-600 bg-indigo-50"
                 : "border-gray-200 hover:bg-gray-50"
-            }`}
+              }`}
           >
             <input
               type="radio"

@@ -3,6 +3,7 @@ import { Clock, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { account, databases } from "../appwrite/appwriteConfig";
 import { Query } from "appwrite";
+import { Loader } from "./Loader";
 
 
 export function TestsPage() {
@@ -135,7 +136,7 @@ export function TestsPage() {
   
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader/>;
   }
 
   return (

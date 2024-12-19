@@ -100,6 +100,8 @@ export default function QuizPage() {
     );
   };
 
+  
+
   const handleAnswerSelect = (answerId) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = answerId;

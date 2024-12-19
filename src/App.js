@@ -32,9 +32,9 @@ function App() {
     checkUserSession();
   }, []);
 
-  // if (isLoading) {
-  //   return <div>Loading...</div>; // Show a loading indicator while checking user session
-  // }
+  if (isLoading) {
+    return <div>Loading...</div>; // Show a loading indicator while checking user session
+  }
 
   // Protected Route component
   const ProtectedRoute = ({ children }) => {

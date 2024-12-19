@@ -4,7 +4,7 @@ import { Query } from "appwrite";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import "chart.js/auto";
 
-export default function Performance() {
+export default function PerformancePage() {
   const [overallStats, setOverallStats] = useState({
     totalTests: 0,
     averageMarks: 0,
