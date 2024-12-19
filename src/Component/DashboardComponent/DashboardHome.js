@@ -46,6 +46,8 @@ export function DashboardHome() {
     setVisibleTests((prev) => prev + 3); // Show 3 more tests
   };
 
+  if(isLoading) return <DashboardLoader/>
+
   if(isLoading)
     return <DashboardLoader/>
 

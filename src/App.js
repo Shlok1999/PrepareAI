@@ -7,7 +7,7 @@ import RegistrationPage from "./Page/RegistrationPage";
 import { TestsPage } from "./Page/TestPage";
 import { DashboardContent } from "./Component/DashboardComponent/DashboardContent";
 import { DashboardHome } from "./Component/DashboardComponent/DashboardHome";
-import ProfileSettings from "./Component/DashboardComponent/ProfileSettings";
+import ProfileSettings from "./Component/DashboardComponent/Profile/ProfileSettings";
 import PerformancePage from "./Page/PerformancePage";
 import QuizPage from "./Page/QuizPage";
 import { account } from "./appwrite/appwriteConfig"; // Appwrite config for checking user session
@@ -32,9 +32,9 @@ function App() {
     checkUserSession();
   }, []);
 
-  if (isLoading) {
-    return <div>Loading...</div>; // Show a loading indicator while checking user session
-  }
+  // if (isLoading) {
+  //   return <div>Loading...</div>; // Show a loading indicator while checking user session
+  // }
 
   // Protected Route component
   const ProtectedRoute = ({ children }) => {
@@ -79,7 +79,7 @@ function App() {
             path="performance"
             element={
               <ProtectedRoute>
-                <PerformancePage />
+                <PerformancePage/>
               </ProtectedRoute>
             }
           />

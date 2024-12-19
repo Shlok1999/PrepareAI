@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { account, databases } from "../appwrite/appwriteConfig";
 import { Query } from "appwrite";
 
+
 export function TestsPage() {
   const navigate = useNavigate();
   const [tests, setTests] = useState([]); // Holds all tests grouped by subject
