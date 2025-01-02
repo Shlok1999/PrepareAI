@@ -20,7 +20,7 @@ export function TestsPage() {
       try {
         let allQuestions = [];
         let response = await databases.listDocuments(databaseId, collectionId, [
-          Query.limit(500),
+          // Query.limit(500),
         ]);
 
         allQuestions = response.documents;
@@ -142,7 +142,6 @@ export function TestsPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">My Tests</h1>
-
       <div className="grid gap-6">
         {tests.map((test, index) => (
           <div key={index} className="bg-white p-6 rounded-lg shadow-sm">

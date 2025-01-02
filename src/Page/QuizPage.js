@@ -53,7 +53,7 @@ export default function QuizPage() {
       try {
         const response = await databases.listDocuments(databaseId, collectionId, [
           Query.equal("subject", subject),
-          Query.limit(90),
+          Query.limit(50),
         ]);
 
         if (response.documents.length > 0) {
@@ -66,7 +66,7 @@ export default function QuizPage() {
         }
 
         const calculatedEndTime = new Date();
-        calculatedEndTime.setHours(calculatedEndTime.getHours() + 48);
+        calculatedEndTime.setHours(calculatedEndTime.getHours() + 2);
         setEndTime(calculatedEndTime);
         setIsLoading(false);
       } catch (error) {
