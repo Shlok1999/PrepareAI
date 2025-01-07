@@ -10,7 +10,7 @@ import { ResultsModal } from "../Component/DashboardComponent/Quiz/ResultsModal"
 import { Query } from "appwrite";
 
 export default function QuizPage() {
-  const { subject } = useParams();
+  const { topic } = useParams();
   const navigate = useNavigate();
 
   const [questions, setQuestions] = useState([]);
@@ -35,8 +35,8 @@ export default function QuizPage() {
 
   useEffect(() => {
     const loadTestState = () => {
-      const savedState = JSON.parse(localStorage.getItem(`testState_${subject}`));
-      const savedQuestions = JSON.parse(localStorage.getItem(`questions_${subject}`));
+      const savedState = JSON.parse(localStorage.getItem(`testState_${topic}`));
+      const savedQuestions = JSON.parse(localStorage.getItem(`questions_${topic}`));
 
       if (savedState && savedQuestions) {
         setQuestions(savedQuestions);
@@ -52,7 +52,7 @@ export default function QuizPage() {
     const fetchQuestions = async () => {
       try {
         const response = await databases.listDocuments(databaseId, collectionId, [
-          Query.equal("subject", subject),
+          Query.equal("topic", topic),
           Query.limit(50),
         ]);
 
@@ -60,9 +60,9 @@ export default function QuizPage() {
           const shuffledQuestions = shuffleArray(response.documents);
           setQuestions(shuffledQuestions);
           setAnswers(Array(shuffledQuestions.length).fill(null));
-          localStorage.setItem(`questions_${subject}`, JSON.stringify(shuffledQuestions));
+          localStorage.setItem(`questions_${topic}`, JSON.stringify(shuffledQuestions));
         } else {
-          console.warn(`No questions found for subject: ${subject}`);
+          console.warn(`No questions found for topic: ${topic}`);
         }
 
         const calculatedEndTime = new Date();
@@ -78,7 +78,7 @@ export default function QuizPage() {
     if (!loadTestState()) {
       fetchQuestions();
     }
-  }, [subject, databaseId, collectionId]);
+  }, [topic, databaseId, collectionId]);
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -91,7 +91,7 @@ export default function QuizPage() {
 
   const saveTestState = () => {
     localStorage.setItem(
-      `testState_${subject}`,
+      `testState_${topic}`,
       JSON.stringify({
         currentQuestion,
         answers,
@@ -163,10 +163,10 @@ export default function QuizPage() {
       const student = await account.get();
       const studentId = student.$id;
   
-      // Fetch the latest mock test document for this student and subject
+      // Fetch the latest mock test document for this student and topic
       const existingMockTest = await databases.listDocuments(databaseId, mock_test_collId, [
         Query.equal("student_id", studentId),
-        Query.equal("subject", subject),
+        Query.equal("topics", topic),
       ]);
   
       if (existingMockTest.documents.length > 0) {
@@ -187,7 +187,7 @@ export default function QuizPage() {
   
         console.log("Mock test record updated successfully.");
       } else {
-        console.warn("No mock test document found for this student and subject.");
+        console.warn("No mock test document found for this student and topic.");
       }
     } catch (error) {
       console.error("Error updating mock test collection:", error);
@@ -197,8 +197,8 @@ export default function QuizPage() {
     setIsResultsModalOpen(true);
   
     // Clear local storage
-    localStorage.removeItem(`testState_${subject}`);
-    localStorage.removeItem(`questions_${subject}`);
+    localStorage.removeItem(`testState_${topic}`);
+    localStorage.removeItem(`questions_${topic}`);
   };
   
 
@@ -207,13 +207,13 @@ export default function QuizPage() {
   };
 
   if (isLoading) return <div>Loading questions...</div>;
-  if (questions.length === 0) return <div>No questions found for {subject}</div>;
+  if (questions.length === 0) return <div>No questions found for {topic}</div>;
 
   return (
     <>
       {isTestModalOpen && (
         <StartTestModal
-          subject={subject}
+          topic={topic}
           duration={120}
           questionCount={questions.length}
           onStart={() => setIsTestModalOpen(false)}

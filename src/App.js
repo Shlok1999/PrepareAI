@@ -86,7 +86,7 @@ function App() {
         </Route>
 
         <Route
-          path="/quiz/:subject"
+          path="/quiz/:topic"
           element={
             <ProtectedRoute>
               <QuizPage />
