@@ -53,7 +53,7 @@ export default function QuizPage() {
       try {
         const response = await databases.listDocuments(databaseId, collectionId, [
           Query.equal("topic", topic),
-          Query.limit(50),
+          Query.limit(20),
         ]);
 
         if (response.documents.length > 0) {
