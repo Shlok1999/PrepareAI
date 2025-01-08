@@ -8,7 +8,7 @@ export default function StudentRegister() {
     email: "",
     password: "",
     phone: "",
-    classLevel: "11",
+    classLevel: "11", 
     exam: "IIT-JEE",
     exam_year: 2024,
     parent_phone: "",
@@ -17,27 +17,39 @@ export default function StudentRegister() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error message when user starts typing
+    if (name === 'password') {
+      setErrorMessage('');
+    }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Check password length first
+    if (formData.password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters long.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      // Create user in Appwrite
       const userResponse = await account.create(
         "unique()",
         formData.email,
         formData.password,
-        formData.name
+        formData.name,
+        formData.phone,
+        formData.parent_phone,
+        formData.classLevel,
+        formData.exam,
+        formData.exam_year
       );
 
-      // Store user details in the database
       try {
         await databases.createDocument(
           process.env.REACT_APP_DATABASE_ID,
@@ -55,19 +67,22 @@ export default function StudentRegister() {
           }
         );
         setSuccessMessage("Registration successful! Start your journey now.");
+        window.location.href = "/" // Redirect to login page
       } catch (dbError) {
         setErrorMessage("Failed to save student details in the database.");
         console.error("Database error:", dbError);
       }
+
+      console.log("User created:", userResponse);
     } catch (error) {
       setErrorMessage("Registration failed. Please try again.");
       console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
-      window.location.href="/"
     }
   };
 
+  // Rest of the component remains the same...
   const renderFormField = (
     label,
     name,
@@ -130,7 +145,7 @@ export default function StudentRegister() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {renderFormField("Full Name", "name", "text", null, "Enter your full name")}
           {renderFormField("Email", "email", "email", null, "Enter your email")}
-          {renderFormField("Password", "password", "password", null, "Create a password")}
+          {renderFormField("Password", "password", "password", null, "Create a password (min. 8 characters)")}
           {renderFormField("Phone Number", "phone", "tel", null, "Enter your phone number")}
           {renderFormField("Class", "classLevel", "select", [
             { value: "11", label: "Class 11" },
@@ -169,27 +184,26 @@ export default function StudentRegister() {
           )}
         </form>
         <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">
+                Already have an account?
+              </span>
+            </div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
-              Already have an account?
-            </span>
+          <div className="mt-6 text-center">
+            <Link
+              to="/"
+              className="text-indigo-600 hover:text-indigo-500"
+            >
+              Sign in to your account
+            </Link>
           </div>
         </div>
-        <div className="mt-6 text-center">
-          <Link
-            to="/"
-            className="text-indigo-600 hover:text-indigo-500"
-          >
-            Sign in to your account
-          </Link>
-        </div>
       </div>
-      </div>
-      
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function QuizPage() {
   const [endTime, setEndTime] = useState(null);
   const [isTestModalOpen, setIsTestModalOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
   const [quizResults, setQuizResults] = useState({
     attempted: 0,
@@ -100,8 +100,6 @@ export default function QuizPage() {
     );
   };
 
-  
-
   const handleAnswerSelect = (answerId) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = answerId;
@@ -137,11 +135,12 @@ export default function QuizPage() {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
+    
     let attempted = 0,
       correct = 0,
       wrong = 0;
   
-    // Iterate through the answers and calculate results
     answers.forEach((ans, index) => {
       if (ans !== null) {
         attempted++;
@@ -154,29 +153,23 @@ export default function QuizPage() {
     });
   
     const totalMarks = correct * 4 - wrong * 1;
-  
     const results = { attempted, correct, wrong, totalMarks };
-    console.log("Quiz Results:", results);
   
     try {
-      // Fetch the student session
       const student = await account.get();
       const studentId = student.$id;
   
-      // Fetch the latest mock test document for this student and topic
       const existingMockTest = await databases.listDocuments(databaseId, mock_test_collId, [
         Query.equal("student_id", studentId),
         Query.equal("topics", topic),
       ]);
   
       if (existingMockTest.documents.length > 0) {
-        // Sort documents by creation date to get the latest one
         const sortedTests = existingMockTest.documents.sort(
           (a, b) => new Date(b.$createdAt) - new Date(a.$createdAt)
         );
         const latestMockTest = sortedTests[0];
   
-        // Update the latest mock test document
         await databases.updateDocument(databaseId, mock_test_collId, latestMockTest.$id, {
           marks: totalMarks,
           attempted: attempted,
@@ -184,23 +177,20 @@ export default function QuizPage() {
           wrong: wrong,
           status: "completed",
         });
-  
-        console.log("Mock test record updated successfully.");
-      } else {
-        console.warn("No mock test document found for this student and topic.");
       }
     } catch (error) {
       console.error("Error updating mock test collection:", error);
+    } finally {
+      // Simulate a slight delay for better UX
+      setTimeout(() => {
+        setQuizResults(results);
+        localStorage.removeItem(`testState_${topic}`);
+        localStorage.removeItem(`questions_${topic}`);
+        setIsSubmitting(false);
+        setIsResultsModalOpen(true);
+      }, 1500);
     }
-  
-    setQuizResults(results);
-    setIsResultsModalOpen(true);
-  
-    // Clear local storage
-    localStorage.removeItem(`testState_${topic}`);
-    localStorage.removeItem(`questions_${topic}`);
   };
-  
 
   const handleTimeUp = () => {
     handleSubmit();
@@ -222,30 +212,42 @@ export default function QuizPage() {
       )}
 
       {!isTestModalOpen && (
-        <QuizLayout totalTime={120} onTimeUp={handleTimeUp}>
-          <Question
-            question={questions[currentQuestion]}
-            selectedAnswer={answers[currentQuestion]}
-            isFlagged={flaggedQuestions.has(currentQuestion)}
-            onAnswerSelect={handleAnswerSelect}
-            onFlag={handleFlagToggle}
-          />
-          <Navigation
-            currentQuestion={currentQuestion}
-            totalQuestions={questions.length}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            onSubmit={handleSubmit}
-          />
-          <QuestionGrid
-            totalQuestions={questions.length}
-            currentQuestion={currentQuestion}
-            answers={answers}
-            flaggedQuestions={flaggedQuestions}
-            onQuestionSelect={handleQuestionSelect}
-          />
-          
-        </QuizLayout>
+        <>
+          <QuizLayout totalTime={120} onTimeUp={handleTimeUp}>
+            <Question
+              question={questions[currentQuestion]}
+              selectedAnswer={answers[currentQuestion]}
+              isFlagged={flaggedQuestions.has(currentQuestion)}
+              onAnswerSelect={handleAnswerSelect}
+              onFlag={handleFlagToggle}
+            />
+            <Navigation
+              currentQuestion={currentQuestion}
+              totalQuestions={questions.length}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              onSubmit={handleSubmit}
+            />
+            <QuestionGrid
+              totalQuestions={questions.length}
+              currentQuestion={currentQuestion}
+              answers={answers}
+              flaggedQuestions={flaggedQuestions}
+              onQuestionSelect={handleQuestionSelect}
+            />
+          </QuizLayout>
+
+          {/* Loading Overlay */}
+          {isSubmitting && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 flex flex-col items-center">
+                <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-lg font-semibold text-gray-900">Submitting your test...</p>
+                <p className="text-sm text-gray-600">Please wait while we calculate your results</p>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <ResultsModal

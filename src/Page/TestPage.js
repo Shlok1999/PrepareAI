@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Clock, FileText } from "lucide-react";
+import { Clock, FileText, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { account, databases } from "../appwrite/appwriteConfig";
 import { Query } from "appwrite";
@@ -71,7 +71,8 @@ export function TestsPage() {
 
   const handleStartOrContinueTest = useCallback(
     async (test) => {
-      setLoadingTests((prev) => ({ ...prev, [test.topic]: true }));
+      const testId = test.topics[0]; // Use the first topic as unique identifier
+      setLoadingTests((prev) => ({ ...prev, [testId]: true }));
       try {
         const student = await account.get();
         if (!student || !student.$id) {
@@ -125,7 +126,7 @@ export function TestsPage() {
       } catch (error) {
         console.error("Error handling test start or continuation:", error);
       } finally {
-        setLoadingTests((prev) => ({ ...prev, [test.topic]: false }));
+        setLoadingTests((prev) => ({ ...prev, [testId]: false }));
       }
     },
     [databaseId, mock_test_collId, navigate]
@@ -135,78 +136,132 @@ export function TestsPage() {
     return <Loader />;
   }
 
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">My Tests</h1>
+  const groupedBySubject = tests.reduce((acc, test) => {
+    if (!acc[test.subject]) {
+      acc[test.subject] = [];
+    }
+    acc[test.subject].push(test);
+    return acc;
+  }, {});
+
+  const continuableTests = tests.filter((test) => 
+    localStorage.getItem(`testState_${test.topics[0]}`)
+  );
+
+  return(
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold text-gray-900">My Tests</h1>
 
       {/* Continue Tests Section */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Continue Tests</h2>
-        <div className="flex overflow-x-auto gap-4">
-          {tests
-            .filter((test) => localStorage.getItem(`testState_${test.topics[0]}`))
-            .map((test, index) => (
+      {continuableTests.length > 0 && (
+        <section className="bg-white rounded-xl p-6 shadow-sm">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <Clock className="w-5 h-5 mr-2 text-indigo-600" />
+            Continue Tests
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {continuableTests.map((test, index) => (
               <div
                 key={index}
-                className="bg-white p-4 rounded-lg shadow-sm min-w-[250px]"
+                className="bg-indigo-50 p-4 rounded-lg border border-indigo-100 hover:border-indigo-300 transition-colors"
               >
-                <h3 className="text-md font-semibold text-gray-900">{test.topics}</h3>
-                <button
-                  onClick={() => handleStartOrContinueTest(test)}
-                  className="mt-4 w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                  disabled={loadingTests[test.topic]}
-                >
-                  {loadingTests[test.topic] ? "Loading..." : "Continue Test"}
-                </button>
-              </div>
-            ))}
-        </div>
-      </div>
-
-      {/* All Tests Section */}
-      <div className="grid gap-6">
-        {tests.map((test, index) => (
-          <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex flex-col">
-              <h3 className="text-lg font-semibold text-gray-900">{test.topics}</h3>
-              <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
-                <span className="flex items-center">
-                  <Clock className="h-4 w-4 mr-1" />
-                  {test.duration}
-                </span>
-                <span className="flex items-center">
-                  <FileText className="h-4 w-4 mr-1" />
-                  {test.questions.length} questions
-                </span>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {test.topics.map((topic, i) => (
-                  <span
-                    key={i}
-                    className="inline-block bg-indigo-50 text-indigo-600 text-sm px-3 py-1 rounded-full"
-                  >
-                    {topic}
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {test.topics.join(", ")}
+                </h3>
+                <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
+                  <span className="flex items-center">
+                    <FileText className="h-4 w-4 mr-1" />
+                    {test.questions.length} questions
                   </span>
-                ))}
-              </div>
-
-              <div className="mt-4">
+                </div>
                 <button
                   onClick={() => handleStartOrContinueTest(test)}
-                  className="w-full sm:w-40 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                  disabled={loadingTests[test.topic]}
+                  className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center"
+                  disabled={loadingTests[test.topics[0]]}
                 >
-                  {loadingTests[test.topic] ? (
-                    <span className="flex items-center justify-center">Starting...</span>
-                  ) : localStorage.getItem(`testState_${test.topics[0]}`) ? (
-                    "Continue Test"
+                  {loadingTests[test.topics[0]] ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Loading...
+                    </span>
                   ) : (
-                    "Start Test"
+                    "Continue Test"
                   )}
                 </button>
               </div>
-            </div>
+            ))}
           </div>
+        </section>
+      )}
+
+      {/* All Tests Section */}
+      <div className="space-y-8">
+        {Object.entries(groupedBySubject).map(([subject, subjectTests], index) => (
+          <section key={index} className="bg-white rounded-xl p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+              <BookOpen className="w-5 h-5 mr-2 text-indigo-600" />
+              {subject}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {subjectTests.map((test, testIndex) => (
+                <div
+                  key={testIndex}
+                  className="bg-white p-5 rounded-lg border border-gray-200 hover:border-indigo-300 transition-all shadow-sm hover:shadow-md"
+                >
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {test.topics.join(", ")}
+                    </h3>
+                    
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <span className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
+                        {test.duration}
+                      </span>
+                      <span className="flex items-center">
+                        <FileText className="h-4 w-4 mr-1" />
+                        {test.questions.length} questions
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {test.topics.map((topic, i) => (
+                        <span
+                          key={i}
+                          className="inline-block bg-indigo-50 text-indigo-600 text-sm px-3 py-1 rounded-full"
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => handleStartOrContinueTest(test)}
+                      className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center"
+                      disabled={loadingTests[test.topics[0]]}
+                    >
+                      {loadingTests[test.topics[0]] ? (
+                        <span className="flex items-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Starting...
+                        </span>
+                      ) : localStorage.getItem(`testState_${test.topics[0]}`) ? (
+                        "Continue Test"
+                      ) : (
+                        "Start Test"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     </div>
