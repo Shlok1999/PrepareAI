@@ -204,7 +204,7 @@ export default function QuizPage() {
       {isTestModalOpen && (
         <StartTestModal
           topic={topic}
-          duration={120}
+          duration={questions.length * 2}
           questionCount={questions.length}
           onStart={() => setIsTestModalOpen(false)}
           onClose={() => navigate("/dashboard/tests")}
@@ -213,7 +213,7 @@ export default function QuizPage() {
 
       {!isTestModalOpen && (
         <>
-          <QuizLayout totalTime={120} onTimeUp={handleTimeUp}>
+          <QuizLayout totalTime={questions.length*2} onTimeUp={handleTimeUp}>
             <Question
               question={questions[currentQuestion]}
               selectedAnswer={answers[currentQuestion]}

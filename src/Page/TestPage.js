@@ -219,11 +219,11 @@ export function TestsPage() {
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center">
                         <Clock className="h-4 w-4 mr-1" />
-                        {test.duration}
+                        40 minutes
                       </span>
                       <span className="flex items-center">
                         <FileText className="h-4 w-4 mr-1" />
-                        {test.questions.length} questions
+                        20 questions
                       </span>
                     </div>
 

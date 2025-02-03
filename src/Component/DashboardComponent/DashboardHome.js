@@ -32,8 +32,12 @@ export function DashboardHome() {
       }
     };
 
+
     fetchTests();
   }, [databaseId, mockTestCollectionId]);
+
+  console.log(recentTests);
+
 
   const stats = [
     { icon: BookOpen, label: "Tests Completed", value: recentTests.length },

@@ -19,7 +19,6 @@ const navItems = [
   { icon: UserCircle, label: "Profile", to: "/dashboard/profile" },
   { icon: BookCheck, label: "Practice", to: "/dashboard/tests" },
   { icon: BarChart, label: "Performance", to: "/dashboard/performance" },
-  { icon: Trophy, label: "Achievements", to: "/dashboard/achievements" },
   { icon: GraduationCap, label: "Study Plan", to: "/dashboard/study-plan" },
   { icon: Settings, label: "Settings", to: "/dashboard/settings" },
 ];
