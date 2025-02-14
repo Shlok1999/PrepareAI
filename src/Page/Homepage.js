@@ -8,6 +8,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Hero } from "../Component/HomeComponents/HeroSection";
 import { Features } from "../Component/HomeComponents/Features";
+import { Pricing } from "../Component/HomeComponents/Pricing";
+import { Testimonial } from "../Component/HomeComponents/Testimonial";
 import Navbar from "../Component/NavigationComponents/Navbar";
 import { Footer } from "../Component/NavigationComponents/Footer";
 
@@ -53,6 +55,8 @@ function Homepage() {
     <Navbar/>
       <Hero/>
       <Features/>
+      <Pricing/>
+      {/* <Testimonial/> */}
       <Footer/>
     </>
   );

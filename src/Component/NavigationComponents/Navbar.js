@@ -48,7 +48,8 @@ export default function Navbar() {
           <div className="flex justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <BookOpen className="h-8 w-8 text-indigo-600" />
+              {/* <BookOpen className="h-8 w-8 text-indigo-600" /> */}
+              <img src="/prepare-ai.png" alt="PrepareAI" className="h-10 w-10" />
               <span className="ml-2 text-xl font-bold text-gray-900">PrepareAI</span>
             </div>
 
@@ -57,8 +58,8 @@ export default function Navbar() {
               <a href="#features" className="text-gray-700 hover:text-indigo-600">
                 Features
               </a>
-              <a href="#subjects" className="text-gray-700 hover:text-indigo-600">
-                Subjects
+              <a href="#pricing" className="text-gray-700 hover:text-indigo-600">
+                Pricing
               </a>
               <a href="#testimonials" className="text-gray-700 hover:text-indigo-600">
                 Testimonials
@@ -106,8 +107,8 @@ export default function Navbar() {
               <a href="#features" className="block px-3 py-2 text-gray-700 hover:text-indigo-600">
                 Features
               </a>
-              <a href="#subjects" className="block px-3 py-2 text-gray-700 hover:text-indigo-600">
-                Subjects
+              <a href="#pricing" className="block px-3 py-2 text-gray-700 hover:text-indigo-600">
+                Pricing
               </a>
               <a href="#testimonials" className="block px-3 py-2 text-gray-700 hover:text-indigo-600">
                 Testimonials

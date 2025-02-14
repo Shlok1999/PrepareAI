@@ -14,6 +14,7 @@ export default function QuizPage() {
   const navigate = useNavigate();
 
   const [questions, setQuestions] = useState([]);
+  const [timePerQuestions, setTimePerQuestions] = useState(2);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [flaggedQuestions, setFlaggedQuestions] = useState(new Set());
@@ -28,6 +29,8 @@ export default function QuizPage() {
     wrong: 0,
     totalMarks: 0,
   });
+
+  
 
   const databaseId = process.env.REACT_APP_DATABASE_ID;
   const collectionId = process.env.REACT_APP_QUESTION_ID;

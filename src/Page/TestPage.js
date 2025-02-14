@@ -20,50 +20,58 @@ export function TestsPage() {
   const fetchTests = useCallback(async () => {
     if (isFetching.current) return;
     isFetching.current = true;
+    setIsLoading(true);
+  
     try {
-      let allQuestions = [];
-      let response = await databases.listDocuments(databaseId, collectionId, []);
-
-      allQuestions = response.documents;
-
-      while (response.total > allQuestions.length) {
-        response = await databases.listDocuments(databaseId, collectionId, [
-          Query.offset(allQuestions.length),
-          Query.limit(100),
-        ]);
-        allQuestions = [...allQuestions, ...response.documents];
+      // Fetch the first batch to get total count
+      let response = await databases.listDocuments(databaseId, collectionId, [Query.limit(100)]);
+      let total = response.total;
+      let allQuestions = response.documents;
+  
+      // Calculate remaining requests
+      let fetchPromises = [];
+      for (let offset = 100; offset < total; offset += 100) {
+        fetchPromises.push(databases.listDocuments(databaseId, collectionId, [
+          Query.offset(offset),
+          Query.limit(100)
+        ]));
       }
-
+  
+      // Fetch all remaining batches in parallel
+      let responses = await Promise.all(fetchPromises);
+      responses.forEach(res => allQuestions.push(...res.documents));
+  
+      // Grouping tests by topic
       const groupedTests = allQuestions.reduce((acc, question) => {
         if (!acc[question.topic]) {
           acc[question.topic] = {
             name: `${question.topic.charAt(0).toUpperCase()}${question.topic.slice(1)} Test`,
-            duration: "2 hours",
+            duration: "40 minutes",
             questions: [],
             topics: new Set(),
             subject: question.subject,
           };
         }
-
         acc[question.topic].questions.push(question);
         acc[question.topic].topics.add(question.topic);
         return acc;
       }, {});
-
+  
+      // Convert topics Set to an array
       const formattedTests = Object.values(groupedTests).map((test) => ({
         ...test,
         topics: Array.from(test.topics),
       }));
-
+  
       setTests(formattedTests);
-      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching tests:", error);
-      setIsLoading(false);
     } finally {
       isFetching.current = false;
+      setIsLoading(false);
     }
   }, [databaseId, collectionId]);
+  
 
   useEffect(() => {
     fetchTests();
@@ -171,7 +179,7 @@ export function TestsPage() {
                 <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
                   <span className="flex items-center">
                     <FileText className="h-4 w-4 mr-1" />
-                    {test.questions.length} questions
+                    20 questions
                   </span>
                 </div>
                 <button
@@ -219,7 +227,7 @@ export function TestsPage() {
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="flex items-center">
                         <Clock className="h-4 w-4 mr-1" />
-                        40 minutes
+                        {test.duration}
                       </span>
                       <span className="flex items-center">
                         <FileText className="h-4 w-4 mr-1" />
