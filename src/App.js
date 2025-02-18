@@ -10,6 +10,7 @@ import { DashboardHome } from "./Component/DashboardComponent/DashboardHome";
 import ProfileSettings from "./Component/DashboardComponent/Profile/ProfileSettings";
 import PerformancePage from "./Page/PerformancePage";
 import QuizPage from "./Page/QuizPage";
+import Guidance from "./Page/Guidance";
 import { account } from "./appwrite/appwriteConfig"; // Appwrite config for checking user session
 
 function App() {
@@ -68,6 +69,14 @@ function App() {
             }
           />
           <Route
+            path="performance"
+            element={
+              <ProtectedRoute>
+                <PerformancePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="profile"
             element={
               <ProtectedRoute>
@@ -76,10 +85,10 @@ function App() {
             }
           />
           <Route
-            path="performance"
+            path="guidance"
             element={
               <ProtectedRoute>
-                <PerformancePage/>
+                <Guidance />
               </ProtectedRoute>
             }
           />
@@ -90,6 +99,15 @@ function App() {
           element={
             <ProtectedRoute>
               <QuizPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/guidance/:test"
+          element={
+            <ProtectedRoute>
+              <Guidance />
             </ProtectedRoute>
           }
         />

@@ -30,11 +30,10 @@ export default function QuizPage() {
     totalMarks: 0,
   });
 
-  
-
   const databaseId = process.env.REACT_APP_DATABASE_ID;
   const collectionId = process.env.REACT_APP_QUESTION_ID;
   const mock_test_collId = process.env.REACT_APP_MOCK_TEST_ID;
+  const test_result_collId = process.env.REACT_APP_DAILY_TEST_COLLECTION;
 
   useEffect(() => {
     const loadTestState = () => {
@@ -139,11 +138,11 @@ export default function QuizPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    
+
     let attempted = 0,
       correct = 0,
       wrong = 0;
-  
+
     answers.forEach((ans, index) => {
       if (ans !== null) {
         attempted++;
@@ -154,25 +153,25 @@ export default function QuizPage() {
         }
       }
     });
-  
+
     const totalMarks = correct * 4 - wrong * 1;
     const results = { attempted, correct, wrong, totalMarks };
-  
+
     try {
       const student = await account.get();
       const studentId = student.$id;
-  
+
       const existingMockTest = await databases.listDocuments(databaseId, mock_test_collId, [
         Query.equal("student_id", studentId),
         Query.equal("topics", topic),
       ]);
-  
+
       if (existingMockTest.documents.length > 0) {
         const sortedTests = existingMockTest.documents.sort(
           (a, b) => new Date(b.$createdAt) - new Date(a.$createdAt)
         );
         const latestMockTest = sortedTests[0];
-  
+
         await databases.updateDocument(databaseId, mock_test_collId, latestMockTest.$id, {
           marks: totalMarks,
           attempted: attempted,
@@ -181,10 +180,35 @@ export default function QuizPage() {
           status: "completed",
         });
       }
+
+      // Log Test Details in Console
+      const testQuestionDetails = questions.map((q, index) => ({
+        question: q.question_text,
+        selectedAnswer: answers[index] !== null ? q.options[answers[index]] : "Unanswered",
+        correctAnswer: q.correct_answer,
+        solution: q.solution,
+        explanation: q.explanation || "No explanation provided",
+      }));
+
+      console.log("Test Completed. Detailed Breakdown:", testQuestionDetails);
+
+      try {
+        const saveTestToDb = await databases.createDocument(databaseId, test_result_collId, "unique()", {
+          student_id: studentId,
+          subject: questions[0].subject,
+          topics: [topic],
+          test_question_details: JSON.stringify(testQuestionDetails),
+          marks: totalMarks,
+        });
+        console.log("Test results saved successfully...", saveTestToDb);
+      } catch (error) {
+        console.error("Error saving test results:", error); 
+      }
+     
+
     } catch (error) {
       console.error("Error updating mock test collection:", error);
     } finally {
-      // Simulate a slight delay for better UX
       setTimeout(() => {
         setQuizResults(results);
         localStorage.removeItem(`testState_${topic}`);
@@ -216,7 +240,7 @@ export default function QuizPage() {
 
       {!isTestModalOpen && (
         <>
-          <QuizLayout totalTime={questions.length*2} onTimeUp={handleTimeUp}>
+          <QuizLayout totalTime={questions.length * 2} onTimeUp={handleTimeUp}>
             <Question
               question={questions[currentQuestion]}
               selectedAnswer={answers[currentQuestion]}
@@ -239,25 +263,10 @@ export default function QuizPage() {
               onQuestionSelect={handleQuestionSelect}
             />
           </QuizLayout>
-
-          {/* Loading Overlay */}
-          {isSubmitting && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-8 flex flex-col items-center">
-                <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-lg font-semibold text-gray-900">Submitting your test...</p>
-                <p className="text-sm text-gray-600">Please wait while we calculate your results</p>
-              </div>
-            </div>
-          )}
         </>
       )}
 
-      <ResultsModal
-        isOpen={isResultsModalOpen}
-        onClose={() => navigate("/dashboard/tests")}
-        results={quizResults}
-      />
+      <ResultsModal isOpen={isResultsModalOpen} onClose={() => navigate("/dashboard/tests")} results={quizResults} />
     </>
   );
 }
