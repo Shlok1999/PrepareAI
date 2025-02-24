@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { account, databases } from "../../../appwrite/appwriteConfig";
 import { Query } from "appwrite";
 
-const API_BASE_URL = "http://localhost:5000/student/guidance"; // Replace with your Node.js API URL
+const API_BASE_URL = "http://localhost:5000/student/guidance"; // Replace with your actual API URL
 
 const GuidanceDetails = () => {
   const daily_test_coll = process.env.REACT_APP_DAILY_TEST_COLLECTION;
@@ -10,10 +10,11 @@ const GuidanceDetails = () => {
 
   const [studentId, setStudentId] = useState(null);
   const [guidanceHistory, setGuidanceHistory] = useState([]);
-  const [testDetails, setTestDetails] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // Fetch student ID when component mounts
+  // Fetch student ID when the component mounts
   useEffect(() => {
     const fetchStudentId = async () => {
       try {
@@ -44,15 +45,29 @@ const GuidanceDetails = () => {
     getGuidanceHistory();
   }, [studentId]);
 
-  // Fetch test details from Node.js backend
-  const fetchTestDetails = async (testId) => {
+  // Function to fetch AI-generated guidance from the backend
+  const getGuidance = async (testId, quizData) => {
+    setLoading(true);
+    setAnalysis(null);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/test-details/${testId}`);
+      const response = await fetch(`${API_BASE_URL}/${testId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(quizData),
+      });
+
       const data = await response.json();
-      setTestDetails(data);
-      setShowModal(true); // Show modal with test details
+      if (response.ok) {
+        setAnalysis(data);
+        setShowModal(true);
+      } else {
+        console.error("Error in AI analysis:", data.error);
+      }
     } catch (error) {
-      console.error("Error fetching test details:", error);
+      console.error("Error fetching AI guidance:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,12 +91,12 @@ const GuidanceDetails = () => {
                 <span className="font-medium text-gray-600">Score:</span>{" "}
                 {test.marks}/80
               </p>
-              <div className="mt-4">
+              <div className="mt-4 flex flex-col gap-3">
                 <button
                   className="w-full text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg font-medium transition"
-                  onClick={() => fetchTestDetails(test.$id)}
+                  onClick={() => getGuidance(test.$id, test)}
                 >
-                  🔍 View Details
+                  📊 Get Guidance
                 </button>
               </div>
             </div>
@@ -93,22 +108,47 @@ const GuidanceDetails = () => {
         </p>
       )}
 
-      {/* MODAL FOR TEST DETAILS */}
-      {showModal && testDetails && (
+      {/* MODAL FOR GUIDANCE DETAILS */}
+      {showModal && analysis && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg">
             <h2 className="text-2xl font-bold mb-4 text-gray-800">
-              {testDetails.subject} - Test Details
+              📌 AI Guidance Report
             </h2>
+
             <p className="text-gray-600">
-              <strong>Score:</strong> {testDetails.marks}/80
+              <strong>Accuracy:</strong> {analysis.overallPerformance.accuracy}%
             </p>
             <p className="text-gray-600">
-              <strong>Date:</strong> {testDetails.date}
+              <strong>Correct Answers:</strong> {analysis.overallPerformance.correctAnswers}
             </p>
             <p className="text-gray-600">
-              <strong>Feedback:</strong> {testDetails.feedback}
+              <strong>Incorrect Answers:</strong> {analysis.overallPerformance.incorrectAnswers}
             </p>
+
+            <h3 className="text-lg font-semibold mt-4">📖 Topic-Wise Analysis</h3>
+            {Object.entries(analysis.topicWiseAnalysis).map(([topic, details]) => (
+              <div key={topic} className="mt-2 p-3 bg-gray-100 rounded-md">
+                <h4 className="font-semibold text-gray-800">{topic}</h4>
+                <p className="text-gray-600">
+                  <strong>Accuracy:</strong> {details.accuracy}%
+                </p>
+                <p className="text-gray-600">
+                  <strong>Incorrect Areas:</strong> {details.areasForImprovement.join(", ")}
+                </p>
+                {details.youtubePlaylists.length > 0 && (
+                  <p className="text-blue-500 mt-1">
+                    <strong>🔗 Resources:</strong>{" "}
+                    {details.youtubePlaylists.map((link, index) => (
+                      <a key={index} href={link} target="_blank" rel="noopener noreferrer">
+                        [Playlist {index + 1}]
+                      </a>
+                    ))}
+                  </p>
+                )}
+              </div>
+            ))}
+
             <button
               className="mt-4 w-full text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-medium transition"
               onClick={() => setShowModal(false)}
@@ -116,6 +156,12 @@ const GuidanceDetails = () => {
               ❌ Close
             </button>
           </div>
+        </div>
+      )}
+
+      {loading && (
+        <div className="text-center mt-4">
+          <p className="text-gray-600">⏳ Generating AI guidance...</p>
         </div>
       )}
     </div>

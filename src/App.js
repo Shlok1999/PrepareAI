@@ -12,6 +12,7 @@ import PerformancePage from "./Page/PerformancePage";
 import QuizPage from "./Page/QuizPage";
 import Guidance from "./Page/Guidance";
 import { account } from "./appwrite/appwriteConfig"; // Appwrite config for checking user session
+import GuidanceDetails from "./Component/DashboardComponent/Guidance/GuidanceDetails";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -95,19 +96,19 @@ function App() {
         </Route>
 
         <Route
-          path="/quiz/:topic"
+          path="/guidance/:test"
           element={
             <ProtectedRoute>
-              <QuizPage />
+              <GuidanceDetails />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/guidance/:test"
+          path="/quiz/:topic"
           element={
             <ProtectedRoute>
-              <Guidance />
+              <QuizPage />
             </ProtectedRoute>
           }
         />

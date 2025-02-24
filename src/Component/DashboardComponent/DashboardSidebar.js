@@ -13,6 +13,7 @@ import {
   Power,
 } from "lucide-react";
 import { account } from "../../appwrite/appwriteConfig"; // Import Appwrite account configuration
+import { GiTeacher } from "react-icons/gi";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
@@ -20,7 +21,8 @@ const navItems = [
   { icon: BookCheck, label: "Practice", to: "/dashboard/tests" },
   { icon: BarChart, label: "Performance", to: "/dashboard/performance" },
   { icon: GraduationCap, label: "Study Plan", to: "/dashboard/study-plan" },
-  { icon: Settings, label: "Settings", to: "/dashboard/settings" },
+  { icon: GiTeacher, label: "Guidance", to: "/dashboard/guidance" },
+  // { icon: Settings, label: "Settings", to: "/dashboard/settings" },
 ];
 
 export default function DashboardSidebar({ isOpen, onClose }) {
